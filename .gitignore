@@ -1,6 +1,5 @@
 #other stuff
-ESP32_Cam\stream_video\secrets.h
-
+ESP32_Cam/stream_video/secrets.h
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
