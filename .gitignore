@@ -1,7 +1,8 @@
 #other stuff
-ESP32_Cam/stream_video/secrets.h
+ESP32/*/*/secrets.h
 Pico/.vscode
 Pico/.micropico
+Pico/secrets.py
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
