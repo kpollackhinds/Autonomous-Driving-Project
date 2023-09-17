@@ -1,0 +1,56 @@
+/* styles.css */
+
+html, body{
+    overflow-y: hidden;
+}
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+#controller-buttons-container {
+    display: flex;
+    flex-direction: column; /* Arrange rows vertically */
+    justify-content: center; /* Center vertically */
+    align-items: center;
+    
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+.button-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px 0;
+
+}
+
+#controller-buttons-container button {
+    text-align: center;
+    width: 80px; /* Adjust the width as needed */
+    height: 40px; /* Adjust the height as needed */
+    font-size: 16px; /* Adjust the font size as needed */
+}
+
+.button-row > button + button {
+    margin-left: 10px; /* Adjust the margin as needed */
+}
+
+#start-button{
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    text-align: center;
+    /* background-color: #58f582; */
+    width: 70px;
+    height: 35px;
+
+    font-size: 16px;
+    
+}

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static_files/styles.css">
+    <title>Document</title>
+</head>
+<body>
+    <script src ="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <button id = "start-button">start</button>
+    <div id="controller-buttons-container">
+        <div class="button-row">
+            <button id="forward">FORWARD</button>
+        </div>
+        <div class="button-row">
+            <button id="left">LEFT</button>
+            <button id ="right">RIGHT</button>
+        </div>
+        <div class="button-row">
+            <button id ="backward">BACKWARD</button>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/index.js') }}" type="text/javascript"></script>
+</body>
+</html>

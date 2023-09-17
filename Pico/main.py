@@ -16,4 +16,6 @@ while True:
     c.right()
     sleep(2)
     c.left()
+    sleep(2)
+    c.stop()
     sleep(7)
