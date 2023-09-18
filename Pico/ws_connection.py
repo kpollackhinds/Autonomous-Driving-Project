@@ -1,9 +1,10 @@
 from time import sleep
 import network
 
-def connect(ssid, pw):
-    wlan = network.WLAN(network.STA_IF)
+def connectWifi(ssid, pw, wlan):
+    print('test')
     wlan.active(True)
+    wlan.disconnect()
     wlan.connect(ssid, pw)
     while wlan.isconnected() == False:
         print('Waiting for connection...')
