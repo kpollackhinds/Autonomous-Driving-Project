@@ -8,6 +8,8 @@ socketio = SocketIO(app)
 HOST = "0.0.0.0"
 PORT = 5000
 
+connected = False
+
 def send_data(data):
     if 'pico_socket' in globals():
         try:
@@ -15,20 +17,6 @@ def send_data(data):
         except Exception as e:
             print(f'Error sending data to Pico: {e}')
     return
-@app.route('/')
-def controller():
-    return render_template("index.html")
-
-@socketio.on('button_click')
-def button_click(data):
-    print(data['data'])
-
-    send_data(data['data'])
-
-@app.route('/js/index.js')
-def serve_js(filename):
-    return send_from_directory('static_files/js', filename)
-
 
 def pico_connection_handler():
     global pico_socket
@@ -39,16 +27,38 @@ def pico_connection_handler():
 
         print(f"Waiting for Pico Client to connect on {HOST}:{PORT}")
         pico_socket, addr = server_socket.accept()
+        connected = True
         while True:
             data = pico_socket.recv(1024)
             if not data:
                 break
             print(data.decode('utf-8'))
 
+@app.route('/')
+def controller():
+    return render_template("index.html")
+
+@socketio.on('button_click')
+def button_click(data):
+    print(data['data'])
+
+    if connected:
+        send_data(data['data'])
+
+@app.route('/js/index.js')
+def serve_js(filename):
+    return send_from_directory('static_files/js', filename)
+
+@socketio.on('start_pico_thread')
+def start_pico_thread():
+    print('starting connection')
+    pico_thread = threading.Thread(target=pico_connection_handler)
+    pico_thread.start()
+
 
 if __name__ == '__main__':
-    pico_thread = threading.Thread(target=pico_connection_handler)
-    pico_thread.start() 
+    # pico_thread = threading.Thread(target=pico_connection_handler)
+    # pico_thread.start() 
     socketio.run(app, host= '0.0.0.0', port= 8080)
     
    

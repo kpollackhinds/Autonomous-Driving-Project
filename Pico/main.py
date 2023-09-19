@@ -29,6 +29,17 @@ while True:
         data = sock.recv(1024)
         if not data:
             break
+
+        match data:
+            case b'stp':
+                c.stop()
+            case b'frwd':
+                c.forward()
+            case b'rght':
+                c.right()
+            case b'lft':
+                c.left()
+
         print(data)
     except OSError as e:
         #handle socket erros or connection issues
@@ -41,13 +52,3 @@ while True:
 sock.close()
 wlan.disconnect()
 wlan.active(False)
-    # c.forward()
-    # sleep(2)
-    # c.backward()
-    # sleep(2)
-    # c.right()
-    # sleep(2)
-    # c.left()
-    # sleep(2)
-    # c.stop()
-    # sleep(7)
