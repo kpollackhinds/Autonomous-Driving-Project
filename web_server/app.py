@@ -20,7 +20,8 @@ def send_data(data):
 
 def pico_connection_handler():
     global pico_socket
-
+    global connected
+    
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
         server_socket.bind((HOST, PORT))
         server_socket.listen()
@@ -28,6 +29,7 @@ def pico_connection_handler():
         print(f"Waiting for Pico Client to connect on {HOST}:{PORT}")
         pico_socket, addr = server_socket.accept()
         connected = True
+        print('pico connected')
         while True:
             data = pico_socket.recv(1024)
             if not data:
