@@ -3,8 +3,8 @@ from cv2 import dnn
 from ultralytics import YOLO
 
 
-url = 'http://192.168.1.164/stream'
-
+# url = 'http://192.168.1.164/stream'  #home
+url = 'http://192.168.1.181/stream'   #sbrt
 cap = cv2.VideoCapture(url)
 
 #creating model object with weights
@@ -31,9 +31,10 @@ if (cap.isOpened() == False):
 while(cap.isOpened()):
     ret, frame = cap.read()
     if ret == True:
+        frame = cv2.rotate(frame, cv2.ROTATE_180)
         results = model(frame, stream = True)
 
-        for r in results():
+        for r in results:
             boxes = r.boxes
 
             for box in boxes:
@@ -42,10 +43,21 @@ while(cap.isOpened()):
 
                 cv2.rectangle(frame, (x1, y1), (x2, y2), color =(255, 0, 255), thickness=3)
 
+                print(box)
                 conf = box.conf[0]
+                
+                clss = int(box.cls[0])
+                print("Class name --->", classNames[clss])
 
-            conf = data[4]
-        cv2.imshow('ESP32 Wrover Cam Stream', cv2.flip(frame, 0))
+                text_loc = [x1, y1]
+                font = cv2.FONT_HERSHEY_SIMPLEX
+                fontScale = 1
+                color = (255, 0, 0)
+                thickness =2
+
+                cv2.putText(frame, classNames[clss], text_loc, font, fontScale, color, thickness)
+
+        cv2.imshow('ESP32 Wrover Cam Stream', frame)
         
         if cv2.waitKey(25) & 0xFF == ord('q'):
             break
