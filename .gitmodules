@@ -1,0 +1,3 @@
+[submodule "JoyStick"]
+	path = JoyStick
+	url = https://github.com/kpollackhinds/JoyStick.git

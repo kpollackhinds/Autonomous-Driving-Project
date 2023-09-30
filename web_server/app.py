@@ -61,6 +61,6 @@ def start_pico_thread():
 if __name__ == '__main__':
     # pico_thread = threading.Thread(target=pico_connection_handler)
     # pico_thread.start() 
-    socketio.run(app, host= '0.0.0.0', port= 8080)
+    socketio.run(app, host= '0.0.0.0', port= 8080, debug = True)
     
    
