@@ -47,6 +47,13 @@ def button_click(data):
     if connected:
         send_data(data['data'])
 
+@socketio.on('joystick_move')
+def joystick_move(data):
+    print(data['data'])
+    if connected:
+        send_data(data['data'])
+
+
 @app.route('/js/index.js')
 def serve_js(filename):
     return send_from_directory('static_files/js', filename)
