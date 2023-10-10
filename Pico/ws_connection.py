@@ -3,11 +3,11 @@ import network
 import usocket as socket
 
 def connectWifi(ssid, pw, wlan):
-    print('test')
     wlan.active(True)
     wlan.disconnect()
     wlan.connect(ssid, pw)
     while wlan.isconnected() == False:
+        print(ssid, pw)
         print('Waiting for connection...')
         sleep(1)
 

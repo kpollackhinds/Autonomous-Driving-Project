@@ -25,10 +25,12 @@ while True:
         led.on()
         while True:
             try:
-                data = sock.recv(1024)
+                data = sock.readline()
                 if not data:
                     break
-                
+
+                data = data[:-1]
+
                 if data == b'stp':
                     c.stop()
                 elif data == b'frwd':
@@ -40,7 +42,10 @@ while True:
                 elif data == b'bck':
                     c.backward()
 
-                print(data)
+                else:
+                    pass
+
+                print(data[:-1])
             except OSError as e:
                 #handle socket erros or connection issues
                 print("Socket error: ", e)

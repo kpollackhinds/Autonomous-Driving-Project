@@ -1,8 +1,10 @@
 #other stuff
 ESP32/*/*/secrets.h
+Arduino_wifi/*/*/secrets.h
 Pico/.vscode
 Pico/.micropico
 Pico/secrets.py
+test/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

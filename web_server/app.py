@@ -43,7 +43,6 @@ def controller():
 @socketio.on('button_click')
 def button_click(data):
     print(data['data'])
-
     if connected:
         send_data(data['data'])
 
