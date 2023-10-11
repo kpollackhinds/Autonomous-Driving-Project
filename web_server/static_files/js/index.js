@@ -15,7 +15,7 @@ const startButton = document.getElementById("start-button");
 const directionalButtons = document.getElementById("direction-buttons");
 const joystick = document.getElementById("joyDiv");
 
-var prev = [0, 0];
+var prev = ["1", 0, 0];
 
 
 
@@ -68,21 +68,59 @@ toggleJoystick.addEventListener('change', function(){
                 var x = joy.GetX();
                 var y = joy.GetY();
                 
-                if (x > 100){x = 100;}
-                else if (x < -100){x = -100}
+                // //x and y should max out at 100 when the inner circle is at the edge of the outer circle
+                // if (x > 100){x = 100;}
+                // else if (x < -100){x = -100}
 
-                if (y > 100){y = 100;}
-                else if (y < -100){y = -100;};
+                // if (y > 100){y = 100;}
+                // else if (y < -100){y = -100;};
                 
-                if (prev[0] != x || prev[1] != y){
-                    var data_s = String(x) + ',' + String(y) + '\n'
+                var theta = Math.atan2(y, x);
+                var magnitude = Math.sqrt((x*x) + (y*y));
+
+                //technically end ranges of joystick make a square shape instead of circle >:( . Quick fix to make math easier 
+                if (magnitude > 100){
+                    magnitude = 100
+                };
+
+                if (theta >= 0){
+                    var dir = "1";
+                    //speeds if in first quadrant
+                    if (x >= 0){
+                        var left_speed = magnitude
+                        var right_speed = Math.floor(100 * theta/(Math.PI/2)) 
+                    }
+                    //speeds if in second quadrant
+                    else{
+                        var left_speed = Math.floor(100 * (Math.PI -theta)/(Math.PI/2))
+                        var right_speed = magnitude
+                    }
+                }
+                else{
+                    var dir = "-1";
+                    //speeds if in fourth quadrant
+                    if(x >= 0){
+                        var left_speed = magnitude
+                        var right_speed = Math.floor(-100 * theta/(Math.PI/2))
+                    }
+                    //speeds if in third quadrant
+                    else{
+                        var left_speed = Math.floor(-100 * (Math.PI + theta)/(Math.PI/2))
+                        var right_speed = magnitude
+                    }
+                };
+
+                //avoiding sending repeated values bc not necessary
+                if (prev[0] != dir || prev[1] != x || prev[2] != y){
+                    var data_s = dir + ',' + String(left_speed) + ',' + String(right_speed) + '\n';
 
                     socket.emit('joystick_move', {data: data_s});
                     console.log(x, y);
-                    console.log(prev)
+                    console.log(left_speed, right_speed);
 
-                    prev[0] = x;
-                    prev[1] = y;
+                    prev[0] = dir;
+                    prev[1] = x;
+                    prev[2] = y;
                 };
             }
 

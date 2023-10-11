@@ -18,11 +18,11 @@ String line;
 WiFiClient client;
 WiFiMulti WiFiMulti;
 
-void forward(unsigned int speed = 100);
-// void reverse();
-// void turnright();
-// void turnleft();
-void stop();
+void forward(unsigned int speed = 50);
+void reverse(unsigned int speed = 50);
+void turnright(unsigned int speed = 50);
+void turnleft(unsigned int speed = 50);
+void stop(unsigned int speed = 50);
 
 void setup() {
   Serial.begin(115200);
@@ -73,20 +73,32 @@ void setup() {
 
 void loop() {
   if (client.available() > 0) {
-  //  delay(20);
   //read back one line from the server
   line = client.readStringUntil('\n');
   // Serial.println(line);
   }
 
+  //manual button commands using default speed of 50
   if (line == "frwd"){
-    Serial.println(line);
     forward();
   }
+  else if (line == "bck"){
+    reverse();
+  }
+  else if (line == "lft"){
+    turnleft();
+  }
+  else if (line == "rght"){
+    turnright();
+  }
   else if (line == "stp"){
-    Serial.println("stop");
     stop();
   }
+
+  else{
+    
+  }
+  
 
   if (client.connected () == 0) {
   client.stop();
@@ -94,9 +106,31 @@ void loop() {
   }
 }
 
-//Sets one motor to rotate CW and the other to rotate CCW. 
+void go(unsigned int left_speed, unsigned int right_speed, unsigned int dir = 1){
+  Serial.println("brr");
+  mapped_left_speed = map(left_speed, 0, 100, 0, 255);
+  mapped_right_speed = map(right_speed, 0, 100, 0, 255);
+
+  //condition for going backwards
+  if (dir == -1){
+    digitalWrite(motorLeft_InputOne, LOW); 
+    analogWrite(motorLeft_InputTwo, mapped_left_speed); 
+    digitalWrite(motorRight_InputThree, LOW); 
+    analogWrite(motorRight_InputFour, mapped_right_speed);
+  }
+  //forwards motion (default)
+  else{
+    digitalWrite(motorLeft_InputOne, mapped_left_speed);
+    digitalWrite(motorLeft_InputTwo, LOW);
+    digitalWrite(motorRight_InputThree  , mapped_right_speed);
+    digitalWrite(motorRight_InputFour, LOW);
+  }
+
+}
+
 void forward(unsigned int speed){  
-  Serial.println("Forward.");
+  Serial.println("Forward");
+  mapped_speed = map(speed, 0, 100, 0, 255);
   digitalWrite(motorLeft_InputOne, HIGH);
   digitalWrite(motorLeft_InputTwo, LOW);
   digitalWrite(motorRight_InputThree  , HIGH);
@@ -105,6 +139,7 @@ void forward(unsigned int speed){
 
 void reverse(unsigned int speed = 100) {
   Serial.println("Reverse");
+  mapped_speed = map(speed, 0, 100, 0, 255);
   digitalWrite(motorLeft_InputOne, LOW); 
   digitalWrite(motorLeft_InputTwo, HIGH); 
   digitalWrite(motorRight_InputThree, LOW); 
@@ -114,6 +149,7 @@ void reverse(unsigned int speed = 100) {
 
 void turnright(unsigned int speed = 100) {
   Serial.println("Turn Right");
+  mapped_speed = map(speed, 0, 100, 0, 255);
   digitalWrite(motorLeft_InputOne, HIGH); 
   digitalWrite(motorLeft_InputTwo, LOW); 
   digitalWrite(motorRight_InputThree, LOW); 
@@ -123,6 +159,7 @@ void turnright(unsigned int speed = 100) {
 
 void turnleft(unsigned int speed) {
   Serial.println("Turn Left");
+  mapped_speed = map(speed, 0, 100, 0, 255);
   digitalWrite(motorLeft_InputOne, LOW); 
   digitalWrite(motorLeft_InputTwo, HIGH); 
   digitalWrite(motorRight_InputThree, HIGH); 
