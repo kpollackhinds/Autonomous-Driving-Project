@@ -5,22 +5,36 @@ url = 'http://192.168.1.164/stream'  #home
 
 cap = cv2.VideoCapture(url)
 
-while cap.isOpened() == False:
+#check if camera open successfully
+if (cap.isOpened() == False):
+    print("Error opening video on stream")
+    exit()
+
+# //     FRAMESIZE_HVGA,     // 480x320
+
+while cap.isOpened():
     ret, frame = cap.read()
     if ret:
 
         #getting a gray scaled image
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        # gray = cv2.cvtColor(cv2.flip(frame,0), cv2.COLOR_BGR2GRAY) 
+        # gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) 
 
-        edges = cv2.Canny(gray, 50, 50, apertureSize=3)
+        # resized_frame = cv2.resize(gray, (30, 20))
+        flipped_frame = cv2.flip(frame,0)
+        cv2.imshow('test', flipped_frame)
 
-        lines = cv2.HoughLines(edges, 1, np.pi/180,200)
-        #image smoothing
-        # blurred = cv2.GaussianBlur(gray, (9,9), 0)
-        cv2.imshow(frame)
 
-        if cv2.waitKey(25) & 0xFF == ord('q'):
+        # press q to exit
+        if cv2.waitKey(3) & 0xFF == ord('q'):
             break
+
+        if cv2.waitKey(3) & 0xFF == ord('s'):
+            resized = cv2.resize(flipped_frame, (30,30))
+            gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY) 
+            cv2.imwrite('output_image.jpg', gray)
+            print('got it')
+
     else:
         break
 

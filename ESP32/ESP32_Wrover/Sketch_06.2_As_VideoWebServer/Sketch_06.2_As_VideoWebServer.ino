@@ -9,8 +9,36 @@
 
 // Select camera model
 #define CAMERA_MODEL_WROVER_KIT // Has PSRAM
-
 #include "camera_pins.h"
+
+//BELOW IS ONLY FOR REFERENCE//
+// typedef enum {
+//     FRAMESIZE_96X96,    // 96x96
+//     FRAMESIZE_QQVGA,    // 160x120
+//     FRAMESIZE_QCIF,     // 176x144
+//     FRAMESIZE_HQVGA,    // 240x176
+//     FRAMESIZE_240X240,  // 240x240
+//     FRAMESIZE_QVGA,     // 320x240
+//     FRAMESIZE_CIF,      // 400x296
+//     FRAMESIZE_HVGA,     // 480x320
+//     FRAMESIZE_VGA,      // 640x480
+//     FRAMESIZE_SVGA,     // 800x600
+//     FRAMESIZE_XGA,      // 1024x768
+//     FRAMESIZE_HD,       // 1280x720
+//     FRAMESIZE_SXGA,     // 1280x1024
+//     FRAMESIZE_UXGA,     // 1600x1200
+//     // 3MP Sensors
+//     FRAMESIZE_FHD,      // 1920x1080
+//     FRAMESIZE_P_HD,     //  720x1280
+//     FRAMESIZE_P_3MP,    //  864x1536
+//     FRAMESIZE_QXGA,     // 2048x1536
+//     // 5MP Sensors
+//     FRAMESIZE_QHD,      // 2560x1440
+//     FRAMESIZE_WQXGA,    // 2560x1600
+//     FRAMESIZE_P_FHD,    // 1080x1920
+//     FRAMESIZE_QSXGA,    // 2560x1920
+//     FRAMESIZE_INVALID
+// } framesize_t;
 
 // defined in secrets.h file
 // const char* ssid     = "********";   //input your wifi name
@@ -49,7 +77,14 @@ void setup() {
   //                      for larger pre-allocated frame buffer.
   if(psramFound()){
     config.frame_size = FRAMESIZE_UXGA;
+    // config.frame_size = FRAMESIZE_HVGA;
+    // config.frame_size = FRAMESIZE_QVGA;
+    // config.frame_size = FRAMESIZE_240X240;
+
+;
     config.jpeg_quality = 10;
+    // config.jpeg_quality = 15;
+
     config.fb_count = 2;
   } else {
     config.frame_size = FRAMESIZE_SVGA;
@@ -67,6 +102,8 @@ void setup() {
   sensor_t * s = esp_camera_sensor_get();
   // drop down frame size for higher initial frame rate
   s->set_framesize(s, FRAMESIZE_VGA);
+    // s->set_framesize(s, FRAMESIZE_240X240);
+
 
   WiFi.begin(ssid, password);
 

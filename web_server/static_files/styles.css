@@ -43,14 +43,22 @@ body {
     top: 10px;
     left: 10px;
     text-align: center;
-    /* background-color: #58f582; */
-    width: 70px;
+    width: 80px;
     height: 35px;
 
-    font-size: 16px;
-    
+    font-size: 16px;    
 }
 
+
+#record-button{
+    position: absolute;
+    top: 55px;
+    left: 10px;
+    text-align: center;
+    width: 80px;
+    height: 38px;
+    font-size: 16px; 
+}
 
 
 #live-stream{

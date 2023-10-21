@@ -11,11 +11,14 @@ const leftButton = document.getElementById("left");
 const rightButton = document.getElementById("right");
 const backButton = document.getElementById("backward");
 const startButton = document.getElementById("start-button");
+const recordBUtton = document.getElementById("record-button");
 
 const directionalButtons = document.getElementById("direction-buttons");
 const joystick = document.getElementById("joyDiv");
 
 var prev = ["1", 0, 0];
+var interval = 5;
+var counter = 0;
 
 
 
@@ -39,6 +42,10 @@ backButton.addEventListener("mousedown", function(){
 startButton.addEventListener("click", function(){
     socket.emit('start_pico_thread');
 });
+
+recordBUtton.addEventListener("click", function(){
+    socket.emit('start_record');
+})
 
 // Event listener for when button is released
 forwardButton.addEventListener("mouseup", function(){
@@ -64,7 +71,11 @@ toggleJoystick.addEventListener('change', function(){
 
         if (cliked_count == 0){
             cliked_count = 1;
-            function sendData(){               
+            function sendData(){
+                // if (counter % interval != 0){
+                //     counter +=1;
+                //     return
+                // }               
                 var x = joy.GetX();
                 var y = joy.GetY();
                 
@@ -76,7 +87,7 @@ toggleJoystick.addEventListener('change', function(){
                 // else if (y < -100){y = -100;};
                 
                 var theta = Math.atan2(y, x);
-                var magnitude = Math.sqrt((x*x) + (y*y));
+                var magnitude = Math.floor(Math.sqrt((x*x) + (y*y)));
 
                 //technically end ranges of joystick make a square shape instead of circle >:( . Quick fix to make math easier 
                 if (magnitude > 100){
@@ -112,7 +123,7 @@ toggleJoystick.addEventListener('change', function(){
 
                 //avoiding sending repeated values bc not necessary
                 if (prev[0] != dir || prev[1] != x || prev[2] != y){
-                    var data_s = dir + ',' + String(left_speed) + ',' + String(right_speed) + '\n';
+                    var data_s = dir + ',' + String(Math.abs(left_speed)) + ',' + String(Math.abs(right_speed)) + '\n';
 
                     socket.emit('joystick_move', {data: data_s});
                     console.log(x, y);
@@ -121,6 +132,8 @@ toggleJoystick.addEventListener('change', function(){
                     prev[0] = dir;
                     prev[1] = x;
                     prev[2] = y;
+
+                    counter +=1;
                 };
             }
 

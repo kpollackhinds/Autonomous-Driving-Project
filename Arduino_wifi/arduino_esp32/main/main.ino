@@ -13,16 +13,27 @@ const int motorLeft_InputOne = A5;
 const int motorRight_InputThree = A7;
 const int motorRight_InputFour = A0;
 
-String line;
+//max number of characters sent per message + null terminator
+const byte maxBufferSize = 13; 
+//initializing buffer to store characters 
+char line[maxBufferSize];
+//initializing vector to store commands parsed from lines recieved
+int commands[3]; 
+int i = 0;
+//initializing token pointer for strtok method
+char* token;
 //create wifi client object
 WiFiClient client;
 WiFiMulti WiFiMulti;
+
+int num_readings = 0;
 
 void forward(unsigned int speed = 50);
 void reverse(unsigned int speed = 50);
 void turnright(unsigned int speed = 50);
 void turnleft(unsigned int speed = 50);
-void stop(unsigned int speed = 50);
+void stop();
+void go(unsigned int left_speed, unsigned int right_speed, int dir = 1);
 
 void setup() {
   Serial.begin(115200);
@@ -34,9 +45,6 @@ void setup() {
   pinMode(A5, OUTPUT);
   pinMode(6, OUTPUT);
   pinMode(A6, OUTPUT);
-
-  digitalWrite(motorLeft_Enable, HIGH); 
-  digitalWrite(motorRight_Enable, HIGH);
 
   // We start by connecting to a WiFi network
   WiFiMulti.addAP(ssid, password);
@@ -73,32 +81,56 @@ void setup() {
 
 void loop() {
   if (client.available() > 0) {
-  //read back one line from the server
-  line = client.readStringUntil('\n');
-  // Serial.println(line);
-  }
+    //read back one line from the server
+    //reads bytes in until new-line character is seen, stores them in the "line" buffer. Also returns the number of bytes read
+    byte size = client.readBytesUntil('\n', line, maxBufferSize);
 
-  //manual button commands using default speed of 50
-  if (line == "frwd"){
-    forward();
-  }
-  else if (line == "bck"){
-    reverse();
-  }
-  else if (line == "lft"){
-    turnleft();
-  }
-  else if (line == "rght"){
-    turnright();
-  }
-  else if (line == "stp"){
-    stop();
-  }
-
-  else{
-    
-  }
+    line[size] = '\0';  //Null-terminator for the byte array
+    // Serial.println(line);
   
+
+    //manual button commands using default speed of 50
+    if (strcmp(line, "frwd") == 0){
+      forward();
+    }
+    else if (strcmp(line, "bck") == 0){
+      reverse();
+    }
+    
+    else if (strcmp(line, "lft") == 0){
+      turnleft();
+    }
+    
+    else if (strcmp(line, "rght") == 0){
+      turnright();
+    }
+    else if (strcmp(line, "stp") == 0){
+      stop();
+    }
+
+    else{
+      i = 0;
+      //splits line buffer on "," character, converts to int, and then stores in the command vector
+      token = strtok(line, ",");
+
+      while (token != NULL){
+        commands[i] = atoi(token);
+        i++;
+        token = strtok(NULL, ",");
+      }
+
+
+      //sends commands to go function
+      // if (commands[1] != 0 || commands[2] !=0){
+        // Serial.println(commands[1]);
+        // Serial.println(commands[2]);
+        // Serial.println(commands[0]);
+      go(commands[1], commands[2], commands[0]);
+      // }
+    }
+  }
+  //reset the line array to an array of zeros in the buffer size
+  memset(line, 0, maxBufferSize);
 
   if (client.connected () == 0) {
   client.stop();
@@ -106,10 +138,9 @@ void loop() {
   }
 }
 
-void go(unsigned int left_speed, unsigned int right_speed, unsigned int dir = 1){
-  Serial.println("brr");
-  mapped_left_speed = map(left_speed, 0, 100, 0, 255);
-  mapped_right_speed = map(right_speed, 0, 100, 0, 255);
+void go(unsigned int left_speed, unsigned int right_speed, int dir){
+  unsigned int mapped_left_speed = map(left_speed, 0, 100, 0, 255);
+  unsigned int mapped_right_speed = map(right_speed, 0, 100, 0, 255);
 
   //condition for going backwards
   if (dir == -1){
@@ -130,16 +161,16 @@ void go(unsigned int left_speed, unsigned int right_speed, unsigned int dir = 1)
 
 void forward(unsigned int speed){  
   Serial.println("Forward");
-  mapped_speed = map(speed, 0, 100, 0, 255);
+  unsigned int mapped_speed = map(speed, 0, 100, 0, 255);
   digitalWrite(motorLeft_InputOne, HIGH);
   digitalWrite(motorLeft_InputTwo, LOW);
   digitalWrite(motorRight_InputThree  , HIGH);
   digitalWrite(motorRight_InputFour, LOW);
 }
 
-void reverse(unsigned int speed = 100) {
+void reverse(unsigned int speed) {
   Serial.println("Reverse");
-  mapped_speed = map(speed, 0, 100, 0, 255);
+  unsigned int mapped_speed = map(speed, 0, 100, 0, 255);
   digitalWrite(motorLeft_InputOne, LOW); 
   digitalWrite(motorLeft_InputTwo, HIGH); 
   digitalWrite(motorRight_InputThree, LOW); 
@@ -147,9 +178,9 @@ void reverse(unsigned int speed = 100) {
   
 }
 
-void turnright(unsigned int speed = 100) {
+void turnright(unsigned int speed) {
   Serial.println("Turn Right");
-  mapped_speed = map(speed, 0, 100, 0, 255);
+  unsigned int mapped_speed = map(speed, 0, 100, 0, 255);
   digitalWrite(motorLeft_InputOne, HIGH); 
   digitalWrite(motorLeft_InputTwo, LOW); 
   digitalWrite(motorRight_InputThree, LOW); 
@@ -159,7 +190,7 @@ void turnright(unsigned int speed = 100) {
 
 void turnleft(unsigned int speed) {
   Serial.println("Turn Left");
-  mapped_speed = map(speed, 0, 100, 0, 255);
+  unsigned int mapped_speed = map(speed, 0, 100, 0, 255);
   digitalWrite(motorLeft_InputOne, LOW); 
   digitalWrite(motorLeft_InputTwo, HIGH); 
   digitalWrite(motorRight_InputThree, HIGH); 
