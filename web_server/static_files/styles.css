@@ -38,25 +38,71 @@ body {
     margin-left: 10px; /* Adjust the margin as needed */
 }
 
-#start-button{
+/* Initial state */
+.start-button{
     position: absolute;
     top: 10px;
     left: 10px;
     text-align: center;
-    width: 80px;
-    height: 35px;
+    /* width: 80px;
+    height: 35px; */
 
+    font-size: 16px;    
+}
+/* connecting */
+.connecting-button{
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    text-align: center;
+    /* width: 80px;
+    height: 35px; */
+    background-color: #d3a248;
+    color: white;
+    font-size: 16px;    
+}
+/* Connected state */
+.connected-button{
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    text-align: center;
+    /* width: 80px;
+    height: 35px; */
+    background-color: #37c548;
+    color: white;
     font-size: 16px;    
 }
 
 
-#record-button{
+.record-button{
     position: absolute;
     top: 55px;
     left: 10px;
     text-align: center;
-    width: 80px;
-    height: 38px;
+    /* width: 80px;
+    height: 38px; */
+    font-size: 16px; 
+}
+
+.recording-button{
+    position: absolute;
+    top: 55px;
+    left: 10px;
+    text-align: center;
+    /* width: 80px;
+    height: 38px; */
+    font-size: 16px; 
+    background-color: #fc8077;
+}
+
+.stop-record-button{
+    position: absolute;
+    top: 55px;
+    left: 10px;
+    text-align: center;
+    /* width: 80px;
+    height: 38px; */
     font-size: 16px; 
 }
 

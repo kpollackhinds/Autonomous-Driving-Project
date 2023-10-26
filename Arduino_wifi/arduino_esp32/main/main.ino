@@ -40,11 +40,9 @@ void setup() {
   delay(10);
 
   pinMode(A3, OUTPUT);
-  pinMode(2, OUTPUT);
   pinMode(A7, OUTPUT);
   pinMode(A5, OUTPUT);
-  pinMode(6, OUTPUT);
-  pinMode(A6, OUTPUT);
+  pinMode(A0, OUTPUT);
 
   // We start by connecting to a WiFi network
   WiFiMulti.addAP(ssid, password);
@@ -80,6 +78,7 @@ void setup() {
 }
 
 void loop() {
+ 
   if (client.available() > 0) {
     //read back one line from the server
     //reads bytes in until new-line character is seen, stores them in the "line" buffer. Also returns the number of bytes read
@@ -119,14 +118,20 @@ void loop() {
         token = strtok(NULL, ",");
       }
 
-
-      //sends commands to go function
-      // if (commands[1] != 0 || commands[2] !=0){
+      Serial.print(commands[0]);
+      Serial.print(" ");
+      Serial.print(commands[1]);
+      Serial.print(" ");
+      Serial.println(commands[2]);      //sends commands to go function
+      if (commands[1] == 0 && commands[2] == 0){
+        stop();
+      }
+      else{
         // Serial.println(commands[1]);
         // Serial.println(commands[2]);
         // Serial.println(commands[0]);
-      go(commands[1], commands[2], commands[0]);
-      // }
+        go(commands[1], commands[2], commands[0]);
+      }
     }
   }
   //reset the line array to an array of zeros in the buffer size
@@ -141,20 +146,20 @@ void loop() {
 void go(unsigned int left_speed, unsigned int right_speed, int dir){
   unsigned int mapped_left_speed = map(left_speed, 0, 100, 0, 255);
   unsigned int mapped_right_speed = map(right_speed, 0, 100, 0, 255);
-
+  Serial.println("GOING");
   //condition for going backwards
   if (dir == -1){
-    digitalWrite(motorLeft_InputOne, LOW); 
+    analogWrite(motorLeft_InputOne, 0); 
     analogWrite(motorLeft_InputTwo, mapped_left_speed); 
-    digitalWrite(motorRight_InputThree, LOW); 
+    analogWrite(motorRight_InputThree, 0); 
     analogWrite(motorRight_InputFour, mapped_right_speed);
   }
   //forwards motion (default)
   else{
-    digitalWrite(motorLeft_InputOne, mapped_left_speed);
-    digitalWrite(motorLeft_InputTwo, LOW);
-    digitalWrite(motorRight_InputThree  , mapped_right_speed);
-    digitalWrite(motorRight_InputFour, LOW);
+    analogWrite(motorLeft_InputOne, mapped_left_speed);
+    analogWrite(motorLeft_InputTwo, 0);
+    analogWrite(motorRight_InputThree  , mapped_right_speed);
+    analogWrite(motorRight_InputFour, 0);
   }
 
 }
@@ -162,47 +167,47 @@ void go(unsigned int left_speed, unsigned int right_speed, int dir){
 void forward(unsigned int speed){  
   Serial.println("Forward");
   unsigned int mapped_speed = map(speed, 0, 100, 0, 255);
-  digitalWrite(motorLeft_InputOne, HIGH);
-  digitalWrite(motorLeft_InputTwo, LOW);
-  digitalWrite(motorRight_InputThree  , HIGH);
-  digitalWrite(motorRight_InputFour, LOW);
+  analogWrite(motorLeft_InputOne, 255);
+  analogWrite(motorLeft_InputTwo, 0);
+  analogWrite(motorRight_InputThree  , 255);
+  analogWrite(motorRight_InputFour, 0);
 }
 
 void reverse(unsigned int speed) {
   Serial.println("Reverse");
   unsigned int mapped_speed = map(speed, 0, 100, 0, 255);
-  digitalWrite(motorLeft_InputOne, LOW); 
-  digitalWrite(motorLeft_InputTwo, HIGH); 
-  digitalWrite(motorRight_InputThree, LOW); 
-  digitalWrite(motorRight_InputFour, HIGH); 
+  analogWrite(motorLeft_InputOne, 0); 
+  analogWrite(motorLeft_InputTwo, 255); 
+  analogWrite(motorRight_InputThree, 0); 
+  analogWrite(motorRight_InputFour, 255); 
   
 }
 
 void turnright(unsigned int speed) {
   Serial.println("Turn Right");
   unsigned int mapped_speed = map(speed, 0, 100, 0, 255);
-  digitalWrite(motorLeft_InputOne, HIGH); 
-  digitalWrite(motorLeft_InputTwo, LOW); 
-  digitalWrite(motorRight_InputThree, LOW); 
-  digitalWrite(motorRight_InputFour, HIGH); 
+  analogWrite(motorLeft_InputOne, 255); 
+  analogWrite(motorLeft_InputTwo, 0); 
+  analogWrite(motorRight_InputThree, 0); 
+  analogWrite(motorRight_InputFour, 255); 
   
 }
 
 void turnleft(unsigned int speed) {
   Serial.println("Turn Left");
   unsigned int mapped_speed = map(speed, 0, 100, 0, 255);
-  digitalWrite(motorLeft_InputOne, LOW); 
-  digitalWrite(motorLeft_InputTwo, HIGH); 
-  digitalWrite(motorRight_InputThree, HIGH); 
-  digitalWrite(motorRight_InputFour, LOW); 
+  analogWrite(motorLeft_InputOne, 0); 
+  analogWrite(motorLeft_InputTwo, 255); 
+  analogWrite(motorRight_InputThree, 255); 
+  analogWrite(motorRight_InputFour, 0); 
   
 }
 
 void stop() {
   Serial.println("PAUSE");
-  digitalWrite(motorLeft_InputOne, LOW); 
-  digitalWrite(motorLeft_InputTwo, LOW); 
-  digitalWrite(motorRight_InputThree, LOW); 
-  digitalWrite(motorRight_InputFour, LOW); 
-  
+  analogWrite(motorLeft_InputOne, 0); 
+  analogWrite(motorLeft_InputTwo, 0); 
+  analogWrite(motorRight_InputThree, 0); 
+  analogWrite(motorRight_InputFour, 0); 
+  Serial.println("done");
 }

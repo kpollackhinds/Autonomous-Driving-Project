@@ -11,7 +11,8 @@ const leftButton = document.getElementById("left");
 const rightButton = document.getElementById("right");
 const backButton = document.getElementById("backward");
 const startButton = document.getElementById("start-button");
-const recordBUtton = document.getElementById("record-button");
+const recordButton = document.getElementById("record-button");
+
 
 const directionalButtons = document.getElementById("direction-buttons");
 const joystick = document.getElementById("joyDiv");
@@ -20,7 +21,8 @@ var prev = ["1", 0, 0];
 var interval = 5;
 var counter = 0;
 
-
+let connectionState = 'initial';
+let recordState = 'initial';
 
 
 // Event Listeners for when button is clicked/being clicked
@@ -39,13 +41,65 @@ backButton.addEventListener("mousedown", function(){
     socket.emit('button_click', {data: 'bck\n'});
 });
 
+
 startButton.addEventListener("click", function(){
-    socket.emit('start_pico_thread');
+    socket.emit('start_mcu_thread');
+
+    switch (connectionState){
+        case 'initial':
+            connectionState = 'connecting';
+            startButton.textContent = 'Connecting...';
+            
+            startButton.classList.remove('start-button');
+            startButton.classList.add('connecting-button');
+            break;
+        
+        case 'connecting':
+            // add additional error handling or functionality later
+            break;
+
+        case 'connected':
+            // add additional functionality later 
+            break
+    }
 });
 
-recordBUtton.addEventListener("click", function(){
-    socket.emit('start_record');
+recordButton.addEventListener("click", function(){
+
+    switch(recordState){
+        
+        case 'initial':
+            socket.emit('manage_record', {data: "start"});
+            recordState = 'Recording';
+            recordButton.textContent = 'Stop Recording';
+
+            recordButton.classList.remove('record-button');
+            recordButton.classList.add('recording-button');
+
+            break;
+        
+        case 'Recording':
+            socket.emit('manage_record', {data:'stop'});
+            recordState = 'initial';
+            recordButton.textContent = 'Start Recording';
+
+            recordButton.classList.remove('recording-button');
+            recordButton.classList.add('record-button');
+
+            break;
+    }
+
 })
+
+socket.on('mcu_connected', function(){
+    connectionState = 'connected';
+    startButton.textContent = 'Connected';
+
+    startButton.classList.remove('connecting-button');
+    startButton.classList.add('connected-button');
+})
+
+
 
 // Event listener for when button is released
 forwardButton.addEventListener("mouseup", function(){
@@ -78,14 +132,7 @@ toggleJoystick.addEventListener('change', function(){
                 // }               
                 var x = joy.GetX();
                 var y = joy.GetY();
-                
-                // //x and y should max out at 100 when the inner circle is at the edge of the outer circle
-                // if (x > 100){x = 100;}
-                // else if (x < -100){x = -100}
-
-                // if (y > 100){y = 100;}
-                // else if (y < -100){y = -100;};
-                
+          
                 var theta = Math.atan2(y, x);
                 var magnitude = Math.floor(Math.sqrt((x*x) + (y*y)));
 

@@ -1,6 +1,7 @@
 import cv2
 import time 
-
+import os
+import numpy as np
 # def capture_frames(cap, save_images, stream_url = None, record_interval = 10):
 #     if not stream_url:
 #         return
@@ -49,10 +50,24 @@ def capture_frames(cap):
         
 
 def record(ret, frame):
-    print('yip')
     if ret:
         resized = cv2.resize(frame, (30,30))
         gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
-        cv2.imwrite('output_image.jpg', cv2.flip(gray, 0))
+
+        path = '../data/output_image0'
+
+        if os.path.exists(path + '.jpg'):
+            path[-1] = str(int(path[-1]) +1) + '.jpg'
+
+        cv2.imwrite(path, cv2.flip(gray, 0))
         print('saved image')
     
+
+def record_commands(command_array):
+
+    path = '../data/command_array.npy'
+    arr = np.array(command_array)
+    print(arr)
+
+    # check to make sure this is what i think it is before saving
+    # np.save(command_array, path)
