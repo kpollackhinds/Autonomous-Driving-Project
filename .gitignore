@@ -5,6 +5,7 @@ Pico/.vscode
 Pico/.micropico
 Pico/secrets.py
 test/
+qtr8a mount.ipt
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

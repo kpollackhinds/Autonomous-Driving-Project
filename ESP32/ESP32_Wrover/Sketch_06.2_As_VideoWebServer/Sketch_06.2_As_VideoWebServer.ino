@@ -88,7 +88,7 @@ void setup() {
     config.fb_count = 2;
   } else {
     config.frame_size = FRAMESIZE_SVGA;
-    config.jpeg_quality = 12;
+    config.jpeg_quality = 30;
     config.fb_count = 1;
   }
 
@@ -101,8 +101,8 @@ void setup() {
 
   sensor_t * s = esp_camera_sensor_get();
   // drop down frame size for higher initial frame rate
-  s->set_framesize(s, FRAMESIZE_VGA);
-    // s->set_framesize(s, FRAMESIZE_240X240);
+  // s->set_framesize(s, FRAMESIZE_VGA);
+    s->set_framesize(s, FRAMESIZE_240X240);
 
 
   WiFi.begin(ssid, password);

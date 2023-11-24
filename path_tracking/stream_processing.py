@@ -49,7 +49,7 @@ def capture_frames(cap):
         #     record(ret, frame)
         
 
-def record(ret, frame):
+def record_frame(ret, frame):
     if ret:
         resized = cv2.resize(frame, (30,30))
         gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)

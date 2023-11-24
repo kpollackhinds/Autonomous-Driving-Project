@@ -9,11 +9,9 @@ import sys, os
 import argparse
 sys.path.append(os.path.abspath(os.path.join('..', 'AUTONOMOUS-DRIVING-PROJECT')))
 
-from path_tracking.stream_processing import record, record_commands
+from path_tracking.stream_processing import record_frame, record_commands
 
 command_array = []
-
-
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--cam', type=int, default= 1, help= 'True or false for whether camera is attached or not')
@@ -28,20 +26,18 @@ connected = False
 save_images = False
 record_interval = 10
 stream_url = 'http://192.168.1.164/stream'  #home
+cap = None
 
-# temporary method of dealing with startup error when camera is not attached. Add opencv error handling later!
-if args.cam == 1:
-    print(args.cam)
-
+if args.cam == 0:
+    pass
+else:
     try:
         cap = cv2.VideoCapture(stream_url)
     except Exception as e:
-        args.cam == 0
-        print("Error capturing frame: {e}".format())
-
+            args.cam == 0
+            print("Error capturing frame: {e}".format())
 
 current_time = time.time()
-
 
 def send_data(data):
     if 'mcu_socket' in globals():
@@ -55,6 +51,7 @@ def send_data(data):
 def mcu_connection_handler():
     global mcu_socket
     global connected
+    global save_images
     
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
         server_socket.bind((HOST, PORT))
@@ -69,6 +66,17 @@ def mcu_connection_handler():
             data = mcu_socket.recv(1024)
             if not data:
                 break
+
+            if save_images:
+                # Velocities will be sent with a leading "_" 
+                if data[0] == b'_':
+                    try:
+                        if cap:
+                            record_frame(cap.read())                            
+                        command_array.append(data[1:].decode('utf-8'))
+                    except Exception as e:
+                        print("error saving frame: {e}".format())
+
             print(data.decode('utf-8'))
 
 def capture_frames():
@@ -83,7 +91,7 @@ def capture_frames():
             yield (b'--frame\r\n'
                     b'Content-Type: image/jpeg\r\n\r\n' + frame_buffer + b'\r\n')  # concat frame one by one and show result
             
-            trigger_record(ret, frame)
+            # trigger_record(ret, frame)
         except Exception as e:
             print("Error captutring frames: {e}".format())
             continue
@@ -100,6 +108,10 @@ def video_feed():
 def controller():
     return render_template("index.html")
 
+@app.route('/train')
+def train():
+    return render_template("train.html")
+
 @socketio.on('button_click')
 def button_click(data):
     print(data['data'])
@@ -115,16 +127,28 @@ def manage_record(data):
         global save_images
         save_images = True
 
+        if connected:
+            send_data('strt\n')
+        else:
+            print("Device not connected, stop and try again")
+
+
     elif data['data'] == "stop":
         print('ending recording')
         record_commands(command_array)
         save_images = False
+
+        if connected:
+            send_data('stpt\n')
 ##save_images variable not being updated correctly within video capture method. fix later
-def trigger_record(ret, frame):
+def trigger_record(ret, frame, vel):
+    global command_array
     global current_time 
-    if save_images and (time.time() - current_time >= record_interval):
-        record(ret, frame)
-        current_time = time.time()
+    # if save_images and (time.time() - current_time >= record_interval):
+    record_frame(ret, frame)
+    command_array.append(vel[1:].decode('utf-8'))
+
+    current_time = time.time()
 
 
 @socketio.on('joystick_move')
@@ -146,7 +170,15 @@ def start_mcu_thread():
 
 
 if __name__ == '__main__':
-    
+    # temporary method of dealing with startup error when camera is not attached. Add opencv error handling later!
+    if args.cam == 1:
+        print(args.cam)
+
+    # try:
+    #     cap = cv2.VideoCapture(stream_url)
+    # except Exception as e:
+    #     args.cam == 0
+    #     print("Error capturing frame: {e}".format())
     socketio.run(app, host= '0.0.0.0', port= 8080, debug = True)
     
    

@@ -1,0 +1,70 @@
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+}
+
+#start-button {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    text-align: center;
+    font-size: 16px;  
+}
+
+#manual-control-button{
+    text-align: center;
+    position: absolute;
+    top: 100px;
+    left: 10px;
+    font-size: 16px;
+}
+
+.record-button {
+    position: absolute;
+    top: 55px;
+    left: 10px;
+    text-align: center;
+    font-size: 16px;
+}
+
+.recording-button{
+    position: absolute;
+    top: 55px;
+    left: 10px;
+    text-align: center;
+    /* width: 80px;
+    height: 38px; */
+    font-size: 16px; 
+    background-color: #fc8077;
+}
+
+.stop-record-button{
+    position: absolute;
+    top: 55px;
+    left: 10px;
+    text-align: center;
+    /* width: 80px;
+    height: 38px; */
+    font-size: 16px; 
+}
+/* 
+.centered-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+} */
+.container {
+    /* width: 80%; */
+    margin: auto;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    display: inline-block;
+    align-items: center;
+    justify-content: center;
+}
