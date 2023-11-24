@@ -63,11 +63,13 @@ def record_frame(ret, frame):
         print('saved image')
     
 
-def record_commands(command_array):
-
-    path = '../data/command_array.npy'
-    arr = np.array(command_array)
-    print(arr)
-
-    # check to make sure this is what i think it is before saving
-    # np.save(command_array, path)
+def record_commands(velocity_array):
+    formatted_vel_array = []
+    for vels in velocity_array:
+        x = vels.split(',')
+        formatted_vel_array.append([float(x[0]), float(x[1])])
+    
+    path = '../data/velocity_array.npy'
+    arr = np.array(formatted_vel_array)
+    print(arr.shape)
+    np.save(formatted_vel_array, path)

@@ -63,21 +63,28 @@ def mcu_connection_handler():
         socketio.emit('mcu_connected')
         print('mcu connected')
         while True:
-            data = mcu_socket.recv(1024)
-            if not data:
-                break
+            full_data = ''
+            while True:
+                data = mcu_socket.recv(1024)
+                if not data:
+                    break
+
+                full_data += data.decode('utf-8')
+                if full_data.endswith('\n'):
+                    break
+            
+            full_data = full_data[:-1]
 
             if save_images:
                 # Velocities will be sent with a leading "_" 
-                if data[0] == b'_':
+                if full_data[0] == '_':
                     try:
                         if cap:
                             record_frame(cap.read())                            
-                        command_array.append(data[1:].decode('utf-8'))
+                        command_array.append(full_data[1:])
                     except Exception as e:
                         print("error saving frame: {e}".format())
-
-            print(data.decode('utf-8'))
+            print(full_data)
 
 def capture_frames():
     current_time = time.time()
@@ -173,12 +180,6 @@ if __name__ == '__main__':
     # temporary method of dealing with startup error when camera is not attached. Add opencv error handling later!
     if args.cam == 1:
         print(args.cam)
-
-    # try:
-    #     cap = cv2.VideoCapture(stream_url)
-    # except Exception as e:
-    #     args.cam == 0
-    #     print("Error capturing frame: {e}".format())
     socketio.run(app, host= '0.0.0.0', port= 8080, debug = True)
     
    

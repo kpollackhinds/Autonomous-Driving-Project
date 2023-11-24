@@ -152,7 +152,8 @@ void loop() {
     client.print("_");
     client.print(v1Filt[LEFT]);
     client.print(",");
-    client.println(v1Filt[RIGHT]);
+    client.print(v1Filt[RIGHT]);
+    client.print("\n");
 
     Serial.println("sent");
     prevTime = currTime;
