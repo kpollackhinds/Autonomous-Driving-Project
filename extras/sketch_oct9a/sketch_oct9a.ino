@@ -1,17 +1,19 @@
 //L293D Motor Test
-const int enable = A7;
+const int enable1 = 5;
 //Motor A
 const int motorPin1  = 6;  // Pin 14 of L293
-const int motorPin2  = A5;  // Pin 10 of L293
+const int motorPin2  = 7;  // Pin 10 of L293
 //Motor B
-const int motorPin3  = 7; // Pin  7 of L293                  
-const int motorPin4  = 2;  // Pin  2 of L293
+const int enable2 = 9;
+const int motorPin3  = 10; // Pin  7 of L293                  
+const int motorPin4  = 11;  // Pin  2 of L293
 
 //This will run only one time.
 void setup(){
     Serial.begin(9600);
     //Set pins as outputs
-    pinMode(enable, OUTPUT);
+    pinMode(enable1, OUTPUT);
+    pinMode(enable2, OUTPUT);
     pinMode(motorPin1, OUTPUT);
     pinMode(motorPin2, OUTPUT);
     pinMode(motorPin3, OUTPUT);
@@ -20,7 +22,7 @@ void setup(){
     //Motor Control - Motor A: motorPin1,motorpin2 & Motor B: motorpin3,motorpin4
 
     //This code  will turn Motor A clockwise for 2 sec.
-    analogWrite(enable, 255);
+    analogWrite(enable1, 255);
     digitalWrite(motorPin1, HIGH);
     digitalWrite(motorPin2, LOW);
     digitalWrite(motorPin3, LOW);
@@ -34,6 +36,7 @@ void setup(){
     delay(1000);
     
     //This code will turn Motor B clockwise for 2 sec.
+    Serial.println("wfat");
     digitalWrite(motorPin1, LOW);
     digitalWrite(motorPin2, LOW);
     digitalWrite(motorPin3, HIGH);
@@ -92,7 +95,7 @@ void loop(){
   //   delay(1000);
 
   //This code  will turn Motor A clockwise for 2 sec.
-    analogWrite(enable, 123);
+    analogWrite(enable1, 123);
     digitalWrite(motorPin1, HIGH);
     digitalWrite(motorPin2, LOW);
     digitalWrite(motorPin3, LOW);
@@ -106,6 +109,7 @@ void loop(){
     delay(1000);
     
     //This code will turn Motor B clockwise for 2 sec.
+    analogWrite(enable2, 123);
     digitalWrite(motorPin1, LOW);
     digitalWrite(motorPin2, LOW);
     digitalWrite(motorPin3, HIGH);
@@ -126,7 +130,7 @@ void loop(){
 
     delay(2000);
 
-    analogWrite(enable, 255);
+    analogWrite(enable1, 255);
     digitalWrite(motorPin1, HIGH);
     digitalWrite(motorPin2, LOW);
     digitalWrite(motorPin3, LOW);
@@ -140,6 +144,7 @@ void loop(){
     delay(1000);
     
     //This code will turn Motor B clockwise for 2 sec.
+    analogWrite(enable2, 255);
     digitalWrite(motorPin1, LOW);
     digitalWrite(motorPin2, LOW);
     digitalWrite(motorPin3, HIGH);

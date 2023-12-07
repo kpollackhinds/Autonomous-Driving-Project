@@ -8,6 +8,8 @@
 #include "secrets.h"
 
 #include <WiFiS3.h>
+//PID line follower
+#include <QTRSensors.h>
 
 #define LEFT 0
 #define RIGHT 1
@@ -15,8 +17,29 @@
 //intervals at which to send speed data
 #define INTERVAL 2 
 
+// Line Sensor Properties
+#define NUM_SENSORS             6  // number of sensors used
+#define NUM_SAMPLES_PER_SENSOR  4  // average 4 analog samples per sensor reading
+// #define EMITTER_PIN             QTR_NO_EMITTER_PIN  // emitter is controlled by digital pin 2
+#define EMITTER_PIN             8  // emitter is controlled by digital pin 8
+
+#define rightMaxSpeed 200 // max speed of the robot
+#define leftMaxSpeed 200 // max speed of the robot
+#define rightBaseSpeed 160 // this is the speed at which the motors should spin when the robot is perfectly on the line
+#define leftBaseSpeed 160 // this is the speed at which the motors should spin when the robot is perfectly on the line
+
 //will determine if we should start training
 bool followLine = false;
+
+QTRSensorsAnalog qtra((unsigned char[]) {A5, A4, A3, A2, A1, A0}, NUM_SENSORS, NUM_SAMPLES_PER_SENSOR, EMITTER_PIN);
+unsigned int sensorValues[NUM_SENSORS];
+const int buttonPin = 12;
+
+// PID Properties
+const double KP = 0.08;
+const double KD = 0.0;
+double lastError = 0;
+const int GOAL = 2400;
 
 //Motor Pin Declarations
 const int motorLeft_Enable = 5;
@@ -65,18 +88,20 @@ WiFiClient client;
 
 //function prototypes
 
-void forward(unsigned int speed = 50);
-void reverse(unsigned int speed = 50);
-void turnright(unsigned int speed = 50);
-void turnleft(unsigned int speed = 50);
 void stop();
-void go(unsigned int left_speed, unsigned int right_speed, int dir = 1);
+void calibrateLineSensor();
 void setMotor(int dir, int pwmVal, int enable, int in1, int in2);
+void setMotors(int pwmVal_Left, int pwmVal_Right) {
 
 void setup() {
   Serial.begin(115200);
   Serial1.begin(115200);
   delay(10);
+
+  // Initialize line sensor array
+  calibrateLineSensor();
+
+  pinMode(buttonPin, INPUT);
 
   pinMode(motorLeft_Enable, OUTPUT);
   pinMode(motorLeft_InputTwo, OUTPUT);
@@ -181,21 +206,34 @@ void loop() {
     stop();
   }
 
+  if (followLine){
+    // Get line position
+    unsigned int position = qtra.readLine(sensorValues, QTR_EMITTERS_ON, 1);
+
+    // Compute error from line
+    int error = GOAL - position;
+
+    // Compute motor adjustment
+    int adjustment = KP*error + KD*(error - lastError);
+
+    // Store error for next increment
+    lastError = error;
+
+    // Adjust motors 
+    int rightMotorSpeed = rightBaseSpeed + adjustment;
+    int leftMotorSpeed = leftBaseSpeed - adjustment;
+
+    if (rightMotorSpeed > rightMaxSpeed ) rightMotorSpeed = rightMaxSpeed; // prevent the motor from going beyond max speed
+    if (leftMotorSpeed > leftMaxSpeed ) leftMotorSpeed = leftMaxSpeed; // prevent the motor from going beyond max speed
+    if (rightMotorSpeed < 0) rightMotorSpeed = 0; // keep the motor speed positive
+    if (leftMotorSpeed < 0) leftMotorSpeed = 0; // keep the motor speed positive
+
+    setMotors(leftMotorSpeed, rightMotorSpeed);
+  }
+
   //manual button commands using default speed of 50
   if (followLine == false){
-    if (strcmp(line, "frwd") == 0){
-    forward();
-    } 
-    else if (strcmp(line, "bck") == 0){
-      reverse();
-    }
-    else if (strcmp(line, "lft") == 0){
-      turnleft();
-    }
-    else if (strcmp(line, "rght") == 0){
-      turnright();
-    }
-    else if (strcmp(line, "stp") == 0){
+    if (strcmp(line, "stp") == 0){
       stop();
     }
   }
@@ -230,7 +268,7 @@ void readEncoder() {
   prevT_i[j] = currT;
 }
 
-void setMotor(int dir, int pwmVal, int enable, int in1, int in2) {
+void setMotor(int pwmVal, int enable, int in1, int in2, int dir = 1) {
   analogWrite(enable, pwmVal);
   if (dir == 1) {
     digitalWrite(in2, LOW);
@@ -244,74 +282,13 @@ void setMotor(int dir, int pwmVal, int enable, int in1, int in2) {
   }
 }
 
-//function to move motor based on joystick commands
-void go(unsigned int left_speed, unsigned int right_speed, int dir){
-  unsigned int mapped_left_speed = map(left_speed, 0, 100, 0, 255);
-  unsigned int mapped_right_speed = map(right_speed, 0, 100, 0, 255);
-  Serial.println("GOING");
-  //condition for going backwards
-  if (dir == -1){
-    analogWrite(motorLeft_InputOne, 0); 
-    analogWrite(motorLeft_InputTwo, mapped_left_speed); 
-    analogWrite(motorRight_InputOne, 0); 
-    analogWrite(motorRight_InputTwo, mapped_right_speed);
-  }
-  //forwards motion (default)
-  else{
-    analogWrite(motorLeft_InputOne, mapped_left_speed);
-    analogWrite(motorLeft_InputTwo, 0);
-    analogWrite(motorRight_InputOne  , mapped_right_speed);
-    analogWrite(motorRight_InputTwo, 0);
-  }
-
-}
-
-void forward(unsigned int speed){  
-  Serial.println("Forward");
-  unsigned int mapped_speed = map(speed, 0, 100, 0, 255);
-  analogWrite(motorLeft_Enable, mapped_speed);
-  analogWrite(motorRight_Enable, mapped_speed);
-
-  digitalWrite(motorLeft_InputOne, HIGH);
-  digitalWrite(motorLeft_InputTwo, 0);
-  digitalWrite(motorRight_InputOne  , HIGH);
-  digitalWrite(motorRight_InputTwo, 0);
-}
-
-void reverse(unsigned int speed) {
-  Serial.println("Reverse");
-  unsigned int mapped_speed = map(speed, 0, 100, 0, 255);
-  analogWrite(motorLeft_Enable, mapped_speed);
-  analogWrite(motorRight_Enable, mapped_speed);
-
-  digitalWrite(motorLeft_InputOne, LOW); 
-  digitalWrite(motorLeft_InputTwo, HIGH); 
-  digitalWrite(motorRight_InputOne, LOW); 
-  digitalWrite(motorRight_InputTwo, HIGH); 
-}
-
-void turnright(unsigned int speed) {
-  Serial.println("Turn Right");
-  unsigned int mapped_speed = map(speed, 0, 100, 0, 255);
-  analogWrite(motorLeft_Enable, mapped_speed);
-  analogWrite(motorRight_Enable, mapped_speed);
-
-  digitalWrite(motorLeft_InputOne, HIGH); 
-  digitalWrite(motorLeft_InputTwo, LOW); 
-  digitalWrite(motorRight_InputOne, LOW); 
-  digitalWrite(motorRight_InputTwo, HIGH);  
-}
-
-void turnleft(unsigned int speed) {
-  Serial.println("Turn Left");
-  unsigned int mapped_speed = map(speed, 0, 100, 0, 255);
-  analogWrite(motorLeft_Enable, mapped_speed);
-  analogWrite(motorRight_Enable, mapped_speed);
-  
-  digitalWrite(motorLeft_InputOne, LOW); 
-  digitalWrite(motorLeft_InputTwo, HIGH); 
-  digitalWrite(motorRight_InputOne, HIGH); 
-  digitalWrite(motorRight_InputTwo, LOW); 
+void setMotors(int pwmVal_Left, int pwmVal_Right) {
+  digitalWrite(motorRight_InputOne, HIGH);
+  digitalWrite(motorRight_InputTwo, LOW);
+  analogWrite(motorRight_Enable, pwmVal_Right);
+  digitalWrite(motorLeft_InputOne, LOW);
+  digitalWrite(motorLeft_InputTwo, HIGH);
+  analogWrite(motorLeft_Enable, pwmVal_Left);
 }
 
 void stop() {
@@ -320,4 +297,16 @@ void stop() {
   digitalWrite(motorLeft_InputTwo, LOW); 
   digitalWrite(motorRight_InputOne, LOW); 
   digitalWrite(motorRight_InputTwo, LOW); 
+}
+
+void calibrateLineSensor() {
+  delay(500);
+  pinMode(13, OUTPUT);
+  digitalWrite(13, HIGH);    // turn on Arduino's LED to indicate we are in calibration mode
+  for (int i = 0; i < 3000; i++)  // make the calibration take about 10 seconds
+  {
+    qtra.calibrate();       // reads all sensors 10 times at 2.5 ms per six sensors (i.e. ~25 ms per call)
+  }
+  digitalWrite(13, LOW);     // turn off Arduino's LED to indicate we are through with calibration
+  Serial.println("done");
 }
