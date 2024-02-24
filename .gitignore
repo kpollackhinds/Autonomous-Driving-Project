@@ -6,6 +6,7 @@ Pico/.micropico
 Pico/secrets.py
 test/
 qtr8a mount.ipt
+data/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
