@@ -25,8 +25,8 @@
 
 #define rightMaxSpeed 200 // max speed of the robot
 #define leftMaxSpeed 200 // max speed of the robot
-#define rightBaseSpeed 160 // this is the speed at which the motors should spin when the robot is perfectly on the line
-#define leftBaseSpeed 160 // this is the speed at which the motors should spin when the robot is perfectly on the line
+#define rightBaseSpeed 180 // this is the speed at which the motors should spin when the robot is perfectly on the line
+#define leftBaseSpeed 180 // this is the speed at which the motors should spin when the robot is perfectly on the line
 
 //will determine if we should start training
 bool followLine = false;
@@ -91,7 +91,7 @@ WiFiClient client;
 void stop();
 void calibrateLineSensor();
 void setMotor(int dir, int pwmVal, int enable, int in1, int in2);
-void setMotors(int pwmVal_Left, int pwmVal_Right) {
+void setMotors(int pwmVal_Left, int pwmVal_Right);
 
 void setup() {
   Serial.begin(115200);
@@ -204,6 +204,7 @@ void loop() {
   if (strcmp(line, "stpt") == 0){
     followLine = false;
     stop();
+    Serial.println("stopping sending data");
   }
 
   if (followLine){

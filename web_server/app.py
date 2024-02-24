@@ -4,14 +4,13 @@ import socket
 import threading
 
 import cv2
-import time
+
+from time import time
 import sys, os
 import argparse
 sys.path.append(os.path.abspath(os.path.join('..', 'AUTONOMOUS-DRIVING-PROJECT')))
 
 from path_tracking.stream_processing import record_frame, record_commands
-
-command_array = []
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--cam', type=int, default= 1, help= 'True or false for whether camera is attached or not')
@@ -23,10 +22,22 @@ HOST = "0.0.0.0"
 PORT = 5000
 
 connected = False
-save_images = False
+start_saving = False
+save_frame = False
 record_interval = 10
 stream_url = 'http://192.168.1.164/stream'  #home
 cap = None
+
+global_ret =None
+gloabl_frame =None
+command_array = []
+current_time = time()
+ 
+base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))  # Get the parent directory
+output_image_dir = os.path.join(base_path, 'data')
+
+# if not os.path.exists(output_image_dir):
+#     os.makedirs(output_image_dir)  # Create the directory if it doesn't exist
 
 if args.cam == 0:
     pass
@@ -37,7 +48,52 @@ else:
             args.cam == 0
             print("Error capturing frame: {e}".format())
 
-current_time = time.time()
+
+def gen_frames():  
+    global start_saving
+    global save_frame
+    while True:
+        success, img = cap.read()  # read the camera frame
+        if not success:
+            break
+        else:
+            ret, buffer = cv2.imencode('.jpg', img)
+            frame = buffer.tobytes()
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
+            
+        if start_saving and save_frame:
+                try:
+                    # Save the frame
+                    resized = cv2.resize(img, (30,30))
+                    gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
+
+                    base_path = os.path.abspath(os.path.join(os.path.dirname(__file__),'..'))
+                    output_img_dir = os.path.join(base_path, 'data')
+
+                    if not os.path.exists(output_image_dir):
+                        os.makedirs(output_image_dir)
+
+                    num = 0
+                    path = os.path.join(output_image_dir, f'image{num}.jpg')
+
+                    #     num+=1
+                    #     path = os.path.join(output_image_dir, f'image{num}.jpg')
+                    # path = f'{base_path}{num}.jpg'
+
+                    while os.path.exists(path):
+                        num += 1
+                        path = os.path.join(output_image_dir, f'image{num}.jpg')
+
+                    # print(path)
+                    success = cv2.imwrite(filename=path, img =cv2.flip(gray, 0))
+                    if success:
+                        print(f'Saved image at {path}')
+                        save_frame = False
+                    else:
+                        print('Failed to save image')
+                except Exception as e:
+                    print(f'Error saving frame: {e}')
 
 def send_data(data):
     if 'mcu_socket' in globals():
@@ -51,7 +107,8 @@ def send_data(data):
 def mcu_connection_handler():
     global mcu_socket
     global connected
-    global save_images
+    global start_saving
+    global save_frame
     
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
         server_socket.bind((HOST, PORT))
@@ -75,41 +132,21 @@ def mcu_connection_handler():
             
             full_data = full_data[:-1]
 
-            if save_images:
+            if start_saving:
                 # Velocities will be sent with a leading "_" 
                 if full_data[0] == '_':
-                    try:
-                        if cap:
-                            record_frame(cap.read())                            
+                        save_frame = True
                         command_array.append(full_data[1:])
-                    except Exception as e:
-                        print("error saving frame: {e}".format())
             print(full_data)
 
-def capture_frames():
-    current_time = time.time()
-    while True:
-        try:
-            ret, frame = cap.read()
-
-            ret, buffer = cv2.imencode('.jpg', frame)
-            frame_buffer = buffer.tobytes()
-
-            yield (b'--frame\r\n'
-                    b'Content-Type: image/jpeg\r\n\r\n' + frame_buffer + b'\r\n')  # concat frame one by one and show result
-            
-            # trigger_record(ret, frame)
-        except Exception as e:
-            print("Error captutring frames: {e}".format())
-            continue
-        
-
+  
 @app.route('/video_feed')
 def video_feed():
     if not args.cam:
         return
-    global save_images
-    return Response(capture_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+    global start_saving
+
+    return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/')
 def controller():
@@ -128,11 +165,12 @@ def button_click(data):
 
 @socketio.on('manage_record')
 def manage_record(data):
+    global start_saving
+
     print(data['data'])
     if data['data'] == "start":
         print('starting to record')
-        global save_images
-        save_images = True
+        start_saving = True
 
         if connected:
             send_data('strt\n')
@@ -141,21 +179,11 @@ def manage_record(data):
 
 
     elif data['data'] == "stop":
+        start_saving = False
         print('ending recording')
-        record_commands(command_array)
-        save_images = False
-
         if connected:
             send_data('stpt\n')
-##save_images variable not being updated correctly within video capture method. fix later
-def trigger_record(ret, frame, vel):
-    global command_array
-    global current_time 
-    # if save_images and (time.time() - current_time >= record_interval):
-    record_frame(ret, frame)
-    command_array.append(vel[1:].decode('utf-8'))
-
-    current_time = time.time()
+        record_commands(command_array)
 
 
 @socketio.on('joystick_move')
@@ -181,5 +209,3 @@ if __name__ == '__main__':
     if args.cam == 1:
         print(args.cam)
     socketio.run(app, host= '0.0.0.0', port= 8080, debug = True)
-    
-   

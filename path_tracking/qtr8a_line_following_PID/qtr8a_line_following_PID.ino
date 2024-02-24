@@ -12,10 +12,10 @@
 // #define rightBaseSpeed 155 // this is the speed at which the motors should spin when the robot is perfectly on the line
 // #define leftBaseSpeed 155 // this is the speed at which the motors should spin when the robot is perfectly on the line
 
-#define rightMaxSpeed 200 // max speed of the robot
-#define leftMaxSpeed 200 // max speed of the robot
-#define rightBaseSpeed 160 // this is the speed at which the motors should spin when the robot is perfectly on the line
-#define leftBaseSpeed 160 // this is the speed at which the motors should spin when the robot is perfectly on the line
+#define rightMaxSpeed 220 // max speed of the robot
+#define leftMaxSpeed 220 // max speed of the robot
+#define rightBaseSpeed 180 // this is the speed at which the motors should spin when the robot is perfectly on the line
+#define leftBaseSpeed 180 // this is the speed at which the motors should spin when the robot is perfectly on the line
 
 QTRSensorsAnalog qtra((unsigned char[]) {A5, A4, A3, A2, A1, A0}, NUM_SENSORS, NUM_SAMPLES_PER_SENSOR, EMITTER_PIN);
 unsigned int sensorValues[NUM_SENSORS];
@@ -32,7 +32,7 @@ const int motorRight_InputTwo = 11;
 const int buttonPin = 12;
 
 // PID Properties
-const double KP = 0.08;
+const double KP = 0.11;
 const double KD = 0.0;
 double lastError = 0;
 // const int GOAL = 3500;

@@ -1,53 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/static_files/css/styles.css">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/static_files/css/styles.css" />
     <title>Document</title>
-</head>
-<body scroll = "no" style = "overflow: hidden;">
-    <script src ="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
-    <script src="{{ url_for('static', filename='js/joy.js') }}" type="module"></script>
-    <script src="{{ url_for('static', filename='js/index.js') }}" type="module"></script>
+  </head>
+  <body scroll="no" style="overflow: hidden">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script
+      src="{{ url_for('static', filename='js/joy.js') }}"
+      type="module"
+    ></script>
+    <script
+      src="{{ url_for('static', filename='js/index.js') }}"
+      type="module"
+    ></script>
 
-    <button id = "start-button" class="start-button">Connect to Device</button>
-    <button id  = "record-button" class="record-button">Start Recording</button>
-    <a href="/train"><button id = "train-button">Train</button></a>
+    <button id="start-button" class="start-button">Connect to Device</button>
+    <button id="record-button" class="record-button">Start Recording</button>
+    <a href="/train"><button id="train-button">Train</button></a>
 
     <!-- <img id = "video-stream" src="http://192.168.1.181/stream" style="transform: rotate(180deg);"> -->
-    <!-- <img id = "video-stream" src="http://192.168.1.164/stream" style="transform: rotate(180deg);"> -->
+    <!-- <img
+      id="video-stream"
+      src="http://192.168.1.164/stream"
+      style="transform: rotate(180deg)"
+    /> -->
     <!-- <img id = "video-stream" src="http://192.168.1.187:8080/video_feed" style="transform: rotate(180deg);"> -->
     <!-- <img id = "video-stream" src="http://192.168.1.187:8080/video_feed" style="transform: rotate(180deg);"> -->
+    <img
+      id="video-stream"
+      src="{{ url_for('video_feed') }}"
+      style="transform: rotate(180deg)"
+    />
 
-    <img id = "video-stream" src="http://192.168.1.164/stream" style="transform: rotate(180deg);">
+    <!-- <img
+      id="video-stream"
+      src="http://192.168.1.164/stream"
+      style="transform: rotate(180deg)"
+    /> -->
 
     <div id="controller-buttons-container">
-        
-        <div id="joyDiv" style="width:200px;height:200px;margin-bottom:20px; display: none;"></div>
+      <div
+        id="joyDiv"
+        style="width: 200px; height: 200px; margin-bottom: 20px; display: none"
+      ></div>
 
-        <div id = "direction-buttons"> 
-            <div class="button-row">
-                <button id="forward">FORWARD</button>
-            </div>
-            <div class="button-row">
-                <button id="left">LEFT</button>
-                <button id ="right">RIGHT</button>
-            </div>
-            <div class="button-row">
-                <button id ="backward">BACKWARD</button>
-            </div>
-        </div>  
+      <div id="direction-buttons">
+        <div class="button-row">
+          <button id="forward">FORWARD</button>
+        </div>
+        <div class="button-row">
+          <button id="left">LEFT</button>
+          <button id="right">RIGHT</button>
+        </div>
+        <div class="button-row">
+          <button id="backward">BACKWARD</button>
+        </div>
+      </div>
 
-        <label class="switch">
-            <input type="checkbox" id="toggle-joystick">
-            <span class="slider"></span>
-        </label>
+      <label class="switch">
+        <input type="checkbox" id="toggle-joystick" />
+        <span class="slider"></span>
+      </label>
 
-        <label for="toggle-joystick">Toggle Joystick</label>
+      <label for="toggle-joystick">Toggle Joystick</label>
     </div>
 
-    
     <!-- <script src="{{ url_for('static', filename='js/index.js') }}" type="text/javascript"></script> -->
-</body>
+  </body>
 </html>

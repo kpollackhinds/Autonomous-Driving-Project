@@ -29,11 +29,17 @@ while cap.isOpened():
         if cv2.waitKey(3) & 0xFF == ord('q'):
             break
 
+        if cv2.waitKey(3) & 0xFF == ord('k'):
+            cv2.imwrite('output_image_reg.jpg', flipped_frame)
+            print('got it')
+
         if cv2.waitKey(3) & 0xFF == ord('s'):
             resized = cv2.resize(flipped_frame, (30,30))
             gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY) 
             cv2.imwrite('output_image.jpg', gray)
             print('got it')
+
+        
 
     else:
         break
