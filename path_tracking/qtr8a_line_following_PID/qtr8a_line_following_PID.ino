@@ -32,7 +32,7 @@ const int motorRight_InputTwo = 11;
 const int buttonPin = 12;
 
 // PID Properties
-const double KP = 0.11;
+const double KP = 0.14;
 const double KD = 0.0;
 double lastError = 0;
 // const int GOAL = 3500;

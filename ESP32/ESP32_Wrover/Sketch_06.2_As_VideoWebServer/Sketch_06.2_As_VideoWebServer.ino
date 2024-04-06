@@ -76,18 +76,19 @@ void setup() {
   // if PSRAM IC present, init with UXGA resolution and higher JPEG quality
   //                      for larger pre-allocated frame buffer.
   if(psramFound()){
-    // config.frame_size = FRAMESIZE_UXGA;
+    config.frame_size = FRAMESIZE_UXGA;
     // config.frame_size = FRAMESIZE_HVGA;
     // config.frame_size = FRAMESIZE_QVGA;
-    config.frame_size = FRAMESIZE_240X240;
-
+    // config.frame_size = FRAMESIZE_240X240; //this one
 ;
-    config.jpeg_quality = 20;
+    config.jpeg_quality = 10;
     // config.jpeg_quality = 15;
 
     config.fb_count = 2;
   } else {
-    config.frame_size = FRAMESIZE_SVGA;
+    config.frame_size = FRAMESIZE_SVGA; //this one
+    // config.frame_size = FRAMESIZE_UXGA; 
+
     // config.jpeg_quality = 30;
     config.jpeg_quality = 15;
 
@@ -104,8 +105,8 @@ void setup() {
   sensor_t * s = esp_camera_sensor_get();
   // drop down frame size for higher initial frame rate
   // s->set_framesize(s, FRAMESIZE_VGA);
-  // s->set_framesize(s, FRAMESIZE_UXGA);
-    s->set_framesize(s, FRAMESIZE_240X240);
+  s->set_framesize(s, FRAMESIZE_QVGA);
+    // s->set_framesize(s, FRAMESIZE_240X240); //this one
 
 
   WiFi.begin(ssid, password);

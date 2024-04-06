@@ -23,10 +23,10 @@
 // #define EMITTER_PIN             QTR_NO_EMITTER_PIN  // emitter is controlled by digital pin 2
 #define EMITTER_PIN             8  // emitter is controlled by digital pin 8
 
-#define rightMaxSpeed 200 // max speed of the robot
-#define leftMaxSpeed 200 // max speed of the robot
-#define rightBaseSpeed 180 // this is the speed at which the motors should spin when the robot is perfectly on the line
-#define leftBaseSpeed 180 // this is the speed at which the motors should spin when the robot is perfectly on the line
+#define rightMaxSpeed 180 // max speed of the robot
+#define leftMaxSpeed 180 // max speed of the robot
+#define rightBaseSpeed 90 // this is the speed at which the motors should spin when the robot is perfectly on the line
+#define leftBaseSpeed 90 // this is the speed at which the motors should spin when the robot is perfectly on the line
 
 //will determine if we should start training
 bool followLine = false;
@@ -36,7 +36,7 @@ unsigned int sensorValues[NUM_SENSORS];
 const int buttonPin = 12;
 
 // PID Properties
-const double KP = 0.08;
+const double KP = 0.14;
 const double KD = 0.0;
 double lastError = 0;
 const int GOAL = 2400;
@@ -175,9 +175,9 @@ void loop() {
 
   if ((currTime - prevTime)/1e6 >= INTERVAL && followLine){
     client.print("_");
-    client.print(v1Filt[LEFT]);
-    client.print(",");
     client.print(v1Filt[RIGHT]);
+    client.print(",");
+    client.print((v1Filt[LEFT])*-1);
     client.print("\n");
 
     Serial.println("sent");
@@ -243,8 +243,33 @@ void loop() {
   memset(line, 0, maxBufferSize);
 
   if (client.connected () == 0) {
-  client.stop();
-  WiFi.disconnect();
+    client.stop();
+    WiFi.disconnect();
+    WiFi.begin(ssid, password);
+
+    while(WiFi.status() != WL_CONNECTED) {
+        Serial.print(".");
+        delay(500);
+    }
+
+    Serial.println("");
+    Serial.println("WiFi connected");
+    Serial.println("IP address: ");
+    Serial.println(WiFi.localIP());
+
+    delay(500);
+
+    Serial.print("Connecting to ");
+    Serial.println(ip_address);
+
+    //connecting to socket 
+    while (!client.connect(ip_address, REMOTE_PORT)) {
+      Serial.println("Connection failed.");
+      Serial.println("Waiting a moment before retrying...");
+    }
+
+    Serial.println("Connected");
+
   } 
   
   delay(1); //delay used to set a fixed sampling rate for low pass filter

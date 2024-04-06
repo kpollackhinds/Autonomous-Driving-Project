@@ -32,6 +32,8 @@ global_ret =None
 gloabl_frame =None
 command_array = []
 current_time = time()
+
+counter = 0
  
 base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))  # Get the parent directory
 output_image_dir = os.path.join(base_path, 'data')
@@ -65,9 +67,11 @@ def gen_frames():
         if start_saving and save_frame:
                 try:
                     # Save the frame
-                    resized = cv2.resize(img, (30,30))
-                    gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
+                    # resized = cv2.resize(img, (30,30))
+                    # gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
+                    # frame_to_save = gray
 
+                    frame_to_save = img
                     base_path = os.path.abspath(os.path.join(os.path.dirname(__file__),'..'))
                     output_img_dir = os.path.join(base_path, 'data')
 
@@ -86,7 +90,7 @@ def gen_frames():
                         path = os.path.join(output_image_dir, f'image{num}.jpg')
 
                     # print(path)
-                    success = cv2.imwrite(filename=path, img =cv2.flip(gray, 0))
+                    success = cv2.imwrite(filename=path, img =cv2.flip(frame_to_save, 0))
                     if success:
                         print(f'Saved image at {path}')
                         save_frame = False
@@ -109,6 +113,7 @@ def mcu_connection_handler():
     global connected
     global start_saving
     global save_frame
+    global counter
     
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
         server_socket.bind((HOST, PORT))
@@ -134,9 +139,10 @@ def mcu_connection_handler():
 
             if start_saving:
                 # Velocities will be sent with a leading "_" 
-                if full_data[0] == '_':
+                if full_data[0] == '_' and counter >0:
                         save_frame = True
                         command_array.append(full_data[1:])
+                counter+=1
             print(full_data)
 
   
@@ -166,6 +172,7 @@ def button_click(data):
 @socketio.on('manage_record')
 def manage_record(data):
     global start_saving
+    global command_array
 
     print(data['data'])
     if data['data'] == "start":
@@ -184,6 +191,7 @@ def manage_record(data):
         if connected:
             send_data('stpt\n')
         record_commands(command_array)
+        command_array = []
 
 
 @socketio.on('joystick_move')

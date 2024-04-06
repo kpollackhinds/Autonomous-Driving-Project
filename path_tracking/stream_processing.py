@@ -37,14 +37,47 @@ def record_commands(velocity_array):
     for vels in velocity_array:
         x = vels.split(',')
         formatted_vel_array.append([float(x[0]), float(x[1])])
+
+    base_path = r'C:\Users\kxfor\OneDrive\Documents\Projects\Autonomous-Driving-Project\data\velocity_run'
+    num = 0
+    path = f'{base_path}{num}.npy'
+
+    while os.path.exists(path):
+        num += 1
+        path = f'{base_path}{num}.npy'
     
     # path = '../data/velocity_array.npy'
-    path = r'C:\Users\kxfor\OneDrive\Documents\Projects\Autonomous-Driving-Project\data\velocity.npy'
+    # path = r'C:\Users\kxfor\OneDrive\Documents\Projects\Autonomous-Driving-Project\data\velocity.npy'
     # path = '../data'
+    new_data = np.array(formatted_vel_array)
     
-    arr = np.array(formatted_vel_array)
-    print(arr.shape)
-    np.save(path, arr)
+    print(new_data.shape)
+    np.save(path, new_data)
+
+# def record_commands(velocity_array):
+#     formatted_vel_array = []
+#     for vels in velocity_array:
+#         x = vels.split(',')
+#         formatted_vel_array.append([float(x[0]), float(x[1])])
+    
+#     # path = '../data/velocity_array.npy'
+#     path = r'C:\Users\kxfor\OneDrive\Documents\Projects\Autonomous-Driving-Project\data\velocity.npy'
+#     # path = '../data'
+#     new_data = np.array(formatted_vel_array)
+#     if os.path.exists(path):
+#         current_data = np.load(path)
+#         arr = np.vstack((current_data, new_data))
+#     else:
+#         arr = new_data
+
+#     try:
+#         print(current_data.shape)
+#     except:
+#         pass
+#     print(arr.shape)
+#     np.save(path, arr)
+
+    
 
 
 # def capture_frames(cap, save_images, stream_url = None, record_interval = 10):
