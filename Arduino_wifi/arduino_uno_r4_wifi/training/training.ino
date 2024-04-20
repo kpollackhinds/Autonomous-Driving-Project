@@ -15,7 +15,7 @@
 #define RIGHT 1
 
 //intervals at which to send speed data
-#define INTERVAL 2 
+#define INTERVAL 1 
 
 // Line Sensor Properties
 #define NUM_SENSORS             6  // number of sensors used
