@@ -1,6 +1,8 @@
 import torch
 from torch import nn 
 
+import torchvision.models as models
+
 # Reference for determining FC layer size after 2D Conv 
 # https://datascience.stackexchange.com/questions/40906/determining-size-of-fc-layer-after-conv-layer-in-pytorch
 
@@ -32,8 +34,8 @@ class CNNRegressor(nn.Module):
         # Fully connected layers
         # Assuming output from conv3 is 32 channels; dimensions need calculation
         # Example: If output from conv3 (after pooling) is (32, H, W), determine H and W to set input_features
-        input_features = 32 * 5 * 5  # This needs to be calculated based on your input size and conv/pool operations
-        self.fc1 = nn.Linear(input_features, 120)
+        # input_features = 32 * 5 * 5  # This needs to be calculated based on your input size and conv/pool operations
+        self.fc1 = nn.Linear(123808, 120)
         self.fc2 = nn.Linear(120, 84)
         self.fc3 = nn.Linear(84, 2)  # Output 2 for the two velocity components
     
@@ -60,4 +62,20 @@ class CNNRegressor(nn.Module):
         x = self.fc3(x)
 
         return x
+
+def getMobileNet(isPretrained):
+    model = models.mobilenet_v3_small(pretrained=isPretrained)
+    # Remove the last classification layer and replace it with a new layer for regression
+    model.classifier[3] = nn.Linear(model.classifier[3].in_features, 2)  # 2 outputs for velocities
+
+    # # Optionally, you can start training with frozen pre-trained layers first
+    # for param in model.features.parameters():
+    #     param.requires_grad = False  # Freeze feature layers
+
+    # # When ready, you can unfreeze these layers for fine-tuning
+    # for param in model.features.parameters():
+    #     param.requires_grad = True  # Unfreeze feature layers for fine-tuning
+
+    return model
+
 
