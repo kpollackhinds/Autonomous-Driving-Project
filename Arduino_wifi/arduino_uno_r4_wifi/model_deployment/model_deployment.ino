@@ -2,20 +2,16 @@
 // add print statements to check if velocities are being sent
 // try with camera
 
-//Code to be run on Arduino Uno R4 to record motor speeds
-
 //ssid, password and ip_address defined in "secrets.h" files
 #include "secrets.h"
 
 #include <WiFiS3.h>
 //PID line follower
 #include <QTRSensors.h>
+#include <sstream>
 
 #define LEFT 0
 #define RIGHT 1
-
-//intervals at which to send speed data
-#define INTERVAL 1 
 
 // Line Sensor Properties
 #define NUM_SENSORS             6  // number of sensors used
@@ -35,26 +31,23 @@ QTRSensorsAnalog qtra((unsigned char[]) {A5, A4, A3, A2, A1, A0}, NUM_SENSORS, N
 unsigned int sensorValues[NUM_SENSORS];
 const int buttonPin = 12;
 
-// PID Properties
-const double KP = 0.16;
-const double KD = 0.0;
-double lastError = 0;
 const int GOAL = 2400;
 
 //Motor Pin Declarations
-const int motorLeft_Enable = 5;
-const int motorLeft_InputOne = 6;
-const int motorLeft_InputTwo = 7;
+  const int motorLeft_Enable = 5;
+  const int motorLeft_InputOne = 6;
+  const int motorLeft_InputTwo = 7;
 
-const int motorRight_Enable = 9;
-const int motorRight_InputOne = 10;
-const int motorRight_InputTwo = 11;
+  const int motorRight_Enable = 9;
+  const int motorRight_InputOne = 10;
+  const int motorRight_InputTwo = 11;
 
 //Encoder Pin Declarations
-const int leftENCA = 2;
-const int leftENCB = 4;
-const int rightENCA = 3;
-const int rightENCB = 13;
+  const int leftENCA = 2;
+  const int leftENCB = 4;
+  const int rightENCA = 3;
+  const int rightENCB = 13;
+
 
 //Arrays used to make access through function a little easier
 const int enca[] = { leftENCA, rightENCA };
@@ -207,30 +200,40 @@ void loop() {
     Serial.println("stopping sending data");
   }
 
-  if (followLine){
-    // Get line position
-    unsigned int position = qtra.readLine(sensorValues, QTR_EMITTERS_ON, 1);
-
-    // Compute error from line
-    int error = GOAL - position;
-
-    // Compute motor adjustment
-    int adjustment = KP*error + KD*(error - lastError);
-
-    // Store error for next increment
-    lastError = error;
-
-    // Adjust motors 
-    int rightMotorSpeed = rightBaseSpeed + adjustment;
-    int leftMotorSpeed = leftBaseSpeed - adjustment;
-
-    if (rightMotorSpeed > rightMaxSpeed ) rightMotorSpeed = rightMaxSpeed; // prevent the motor from going beyond max speed
-    if (leftMotorSpeed > leftMaxSpeed ) leftMotorSpeed = leftMaxSpeed; // prevent the motor from going beyond max speed
-    if (rightMotorSpeed < 0) rightMotorSpeed = 0; // keep the motor speed positive
-    if (leftMotorSpeed < 0) leftMotorSpeed = 0; // keep the motor speed positive
-
+  if (followLine && (strcmp(line, "mdl_deploy") == 0)){
+    char temp_line = [maxBufferSize];
+    temp_line[maxBufferSize] = '\0';
+    unsigned int temp_size = client.readBytesUntil('\n', temp_line, maxBufferSize)
+    
+    sscanf(line.c_str(), "%f,%f", &leftMotorSpeed, &rightMotorSpeed);
     setMotors(leftMotorSpeed, rightMotorSpeed);
+    // l_speed,r_speed/n
   }
+
+  // if (followLine){
+  //   // Get line position
+  //   unsigned int position = qtra.readLine(sensorValues, QTR_EMITTERS_ON, 1);
+
+  //   // Compute error from line
+  //   int error = GOAL - position;
+
+  //   // Compute motor adjustment
+  //   int adjustment = KP*error + KD*(error - lastError);
+
+  //   // Store error for next increment
+  //   lastError = error;
+
+  //   // Adjust motors 
+  //   int rightMotorSpeed = rightBaseSpeed + adjustment;
+  //   int leftMotorSpeed = leftBaseSpeed - adjustment;
+
+  //   if (rightMotorSpeed > rightMaxSpeed ) rightMotorSpeed = rightMaxSpeed; // prevent the motor from going beyond max speed
+  //   if (leftMotorSpeed > leftMaxSpeed ) leftMotorSpeed = leftMaxSpeed; // prevent the motor from going beyond max speed
+  //   if (rightMotorSpeed < 0) rightMotorSpeed = 0; // keep the motor speed positive
+  //   if (leftMotorSpeed < 0) leftMotorSpeed = 0; // keep the motor speed positive
+
+  //   setMotors(leftMotorSpeed, rightMotorSpeed);
+  // }
 
   //manual button commands using default speed of 50
   if (followLine == false){

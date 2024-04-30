@@ -193,6 +193,25 @@ def manage_record(data):
         record_commands(command_array)
         command_array = []
 
+@socketio.on('start_method')
+def manage_method(data):
+    data = data["data"]
+    match data:
+        case "start_model1":
+            print("model 1")
+            pass
+        case "start_mobilenet":
+            print("mobilenet")
+            pass
+        case "stop_motion":
+            print("stopping everythin")
+            pass
+        case "start_trad":
+            print("starting contour method")
+            pass
+        case _:
+            print("invalid data:\n")
+            print(data)
 
 @socketio.on('joystick_move')
 def joystick_move(data):
