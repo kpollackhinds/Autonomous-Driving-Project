@@ -2,6 +2,8 @@ import torch
 from torch import nn 
 
 import torchvision.models as models
+from torchvision.models import mobilenet_v3_small, MobileNet_V3_Small_Weights
+
 
 # Reference for determining FC layer size after 2D Conv 
 # https://datascience.stackexchange.com/questions/40906/determining-size-of-fc-layer-after-conv-layer-in-pytorch
@@ -37,7 +39,7 @@ class CNNRegressor(nn.Module):
         # input_features = 32 * 5 * 5  # This needs to be calculated based on your input size and conv/pool operations
         self.fc1 = nn.Linear(123808, 120)
         self.fc2 = nn.Linear(120, 84)
-        self.fc3 = nn.Linear(84, 2)  # Output 2 for the two velocity components
+        self.fc3 = nn.Linear(84, 1)  # Output 2 for the two velocity components
     
     def forward(self, x):
         x = self.conv1(x)
@@ -56,15 +58,32 @@ class CNNRegressor(nn.Module):
 
         x = self.dropout(x)
         x = self.flatten(x)
-        print(x.shape)
         x = self.fc1(x)
         x = self.fc2(x)
         x = self.fc3(x)
 
         return x
 
-def getMobileNet(isPretrained):
-    model = models.mobilenet_v3_small(pretrained=isPretrained)
+def getMobileNet(isPretrained=False, grayscale = True, weights_path = None):
+    if isPretrained:
+        # Load the default pre-trained weights
+        weights = MobileNet_V3_Small_Weights.DEFAULT
+        model = mobilenet_v3_small(weights=weights)
+    else:
+        # Initialize without pre-trained weights
+        model = mobilenet_v3_small(weights=None)
+    # changing the first layer to fit gray scaled inputs:
+    if grayscale:
+        first_conv_layer = model.features[0][0]
+        # really just making the input layer size 1 instead of 3
+        new_first_layer = torch.nn.Conv2d(1, first_conv_layer.out_channels, 
+                                           kernel_size=first_conv_layer.kernel_size, 
+                                           stride=first_conv_layer.stride, 
+                                           padding=first_conv_layer.padding, 
+                                           bias=False)
+        
+        model.features[0][0] = new_first_layer
+
     # Remove the last classification layer and replace it with a new layer for regression
     model.classifier[3] = nn.Linear(model.classifier[3].in_features, 2)  # 2 outputs for velocities
 
@@ -76,6 +95,9 @@ def getMobileNet(isPretrained):
     # for param in model.features.parameters():
     #     param.requires_grad = True  # Unfreeze feature layers for fine-tuning
 
+    # load model after training
+    if weights_path:
+        model.load_state_dict(torch.load(weights_path))
     return model
 
 

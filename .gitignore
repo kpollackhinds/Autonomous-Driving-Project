@@ -7,6 +7,9 @@ Pico/secrets.py
 test/
 qtr8a mount.ipt
 data/
+*.pth
+*_models
+path_tracking/mobilenetv3
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

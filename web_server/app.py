@@ -11,6 +11,7 @@ import argparse
 sys.path.append(os.path.abspath(os.path.join('..', 'AUTONOMOUS-DRIVING-PROJECT')))
 
 from path_tracking.stream_processing import record_frame, record_commands
+from path_tracking.traditional_methods.method1_funcs import followLine
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--cam', type=int, default= 1, help= 'True or false for whether camera is attached or not')
@@ -24,17 +25,18 @@ PORT = 5000
 connected = False
 start_saving = False
 save_frame = False
+start_deploy = False 
+start_trad = False
 record_interval = 10
 stream_url = 'http://192.168.1.164/stream'  #home
 cap = None
 
 global_ret =None
-gloabl_frame =None
+global_frame =None
 command_array = []
 current_time = time()
 
 counter = 0
- 
 base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))  # Get the parent directory
 output_image_dir = os.path.join(base_path, 'data')
 
@@ -54,6 +56,9 @@ else:
 def gen_frames():  
     global start_saving
     global save_frame
+    global frame
+    global start_trad
+
     while True:
         success, img = cap.read()  # read the camera frame
         if not success:
@@ -61,8 +66,11 @@ def gen_frames():
         else:
             ret, buffer = cv2.imencode('.jpg', img)
             frame = buffer.tobytes()
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
+            if not start_trad:
+                yield (b'--frame\r\n'
+                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
+            
+        
             
         if start_saving and save_frame:
                 try:
@@ -98,6 +106,11 @@ def gen_frames():
                         print('Failed to save image')
                 except Exception as e:
                     print(f'Error saving frame: {e}')
+        elif start_trad:
+            # PUT STUFF HERE
+            pass
+
+
 
 def send_data(data):
     if 'mcu_socket' in globals():
@@ -196,17 +209,32 @@ def manage_record(data):
 @socketio.on('start_method')
 def manage_method(data):
     data = data["data"]
+    global start_deploy
+    global start_trad
     match data:
-        case "start_model1":
+        case "start_model1": 
+            start_trad = False
+            start_deploy = True
+            # initialize model here by readinig it in from the  file
             print("model 1")
             pass
         case "start_mobilenet":
+            start_trad = False
+            start_deploy = True
+            # initialize model here by readinig it in from the  file
             print("mobilenet")
             pass
         case "stop_motion":
+            start_trad = False
+            start_deploy = False
             print("stopping everythin")
             pass
         case "start_trad":
+            start_deploy = False
+            start_trad = True
+            # need to pass some message to the vehicle to make it stop
+            if connected:
+                send_data("stpt\n")
             print("starting contour method")
             pass
         case _:
