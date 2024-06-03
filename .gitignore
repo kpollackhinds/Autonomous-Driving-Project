@@ -11,6 +11,7 @@ data/
 *_models
 path_tracking/mobilenetv3
 *.MOV
+Arduino_wifi/arduino_esp32/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
