@@ -6,7 +6,8 @@ url = 'http://192.168.1.164/stream'  # home
 cap = cv2.VideoCapture(url)
 
 # Motor control setup (stub functions to be replaced with actual motor control logic)
-def set_motor_speeds(left_speed, right_speed):
+def set_motor_speeds(left_speed, right_speed, cx):
+    print(f"cx: {cx}")
     print(f"Left Speed: {left_speed}, Right Speed: {right_speed}")
 
 # Main loop
@@ -21,7 +22,7 @@ while True:
     # blurred = cv2.GaussianBlur(gray, (7, 7), 0)
     
     # Threshold the image
-    _, thresholded = cv2.threshold(gray, 40, 255, cv2.THRESH_BINARY)
+    _, thresholded = cv2.threshold(gray, 70, 255, cv2.THRESH_BINARY)
     
     # Convert the binary thresholded image to a BGR image so we can draw colored elements on it
     colored_thresholded = cv2.cvtColor(thresholded, cv2.COLOR_GRAY2BGR)
@@ -53,16 +54,16 @@ while True:
         cv2.drawContours(colored_thresholded, c, -1, (0, 0, 255), 2)  # Red color for visibility
 
         # Adjust motor speeds based on deviation
-        left_speed = min(speed_base - (deviation * adjustment_factor), speed_max)
-        right_speed = min(speed_base + (deviation * adjustment_factor), speed_max)
+        left_speed = min(speed_base + (deviation * adjustment_factor), speed_max)
+        right_speed = min(speed_base - (deviation * adjustment_factor), speed_max)
         
         # Set motor speeds
-        set_motor_speeds(left_speed, right_speed)
+        set_motor_speeds(left_speed, right_speed, deviation)
     
     # Show the frame
     cv2.imshow("Thresholded", colored_thresholded)
 
-    # cv2.imshow("frame", frame)
+    cv2.imshow("frame", frame)
     # cv2.imshow("threshold", colored_thresholded)
     
     if cv2.waitKey(3) & 0xFF == ord('q'):

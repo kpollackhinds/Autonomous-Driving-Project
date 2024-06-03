@@ -45,21 +45,31 @@ class CNNRegressor(nn.Module):
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.relu(x)
-        x = self.pool(x)
+        # print("p1, " ,x.shape)
 
+        x = self.pool(x)
+        # print("c2, " ,x.shape)
         x = self.conv2(x)
         x = self.bn2(x)
         x = self.relu(x)
+        # print("p2, " ,x.shape)
+
         x = self.pool(x)
+        # print("c3, " ,x.shape)
 
         x = self.conv3(x)
         x = self.bn3(x)
         x = self.relu(x)
+        # print("fc1, " ,x.shape)
 
         x = self.dropout(x)
         x = self.flatten(x)
         x = self.fc1(x)
+        # print("fc2, " ,x.shape)
+
         x = self.fc2(x)
+        # print("fc3, " ,x.shape)
+
         x = self.fc3(x)
 
         return x
@@ -85,7 +95,7 @@ def getMobileNet(isPretrained=False, grayscale = True, weights_path = None):
         model.features[0][0] = new_first_layer
 
     # Remove the last classification layer and replace it with a new layer for regression
-    model.classifier[3] = nn.Linear(model.classifier[3].in_features, 2)  # 2 outputs for velocities
+    model.classifier[3] = nn.Linear(model.classifier[3].in_features, 1)  # 2 outputs for velocities
 
     # # Optionally, you can start training with frozen pre-trained layers first
     # for param in model.features.parameters():

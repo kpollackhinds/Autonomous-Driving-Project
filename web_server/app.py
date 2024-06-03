@@ -58,7 +58,6 @@ def gen_frames():
     global save_frame
     global frame
     global start_trad
-
     while True:
         success, img = cap.read()  # read the camera frame
         if not success:
@@ -66,7 +65,7 @@ def gen_frames():
         else:
             ret, buffer = cv2.imencode('.jpg', img)
             frame = buffer.tobytes()
-            if not start_trad:
+            if frame:
                 yield (b'--frame\r\n'
                     b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
             
@@ -107,14 +106,39 @@ def gen_frames():
                 except Exception as e:
                     print(f'Error saving frame: {e}')
         elif start_trad:
-            # PUT STUFF HERE
-            pass
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        #     # PUT STUFF HERE
+            _, thresholded = cv2.threshold(gray, 70, 255, cv2.THRESH_BINARY)
+
+            contours, hierachy = cv2.findContours(thresholded, 1, cv2.CHAIN_APPROX_NONE)
+
+            if contours:
+                # Find the largest contour and its center
+                c = max(contours, key=cv2.contourArea)
+                M = cv2.moments(c)
+                if M["m00"] != 0:
+                    cx = int(M["m10"] / M["m00"])
+                    cy = int(M["m01"] / M["m00"])
+                                    
+                # Compute deviation from the center of the frame
+                deviation = cx - (320 // 2)
+                speed_base = 90
+                speed_max = 180
+                adjustment_factor = 0.5
+
+                # Adjust motor speeds based on deviation
+                left_speed = min(speed_base - (deviation * adjustment_factor), speed_max)
+                right_speed = min(speed_base + (deviation * adjustment_factor), speed_max)
+
+                send_data(f"{left_speed},{right_speed}\n")
+
 
 
 
 def send_data(data):
     if 'mcu_socket' in globals():
         try:
+            print(data)
             mcu_socket.sendall(data.encode('utf-8'))
         except Exception as e:
             print(f'Error sending data to Pico: {e}')
@@ -228,13 +252,16 @@ def manage_method(data):
             start_trad = False
             start_deploy = False
             print("stopping everythin")
+            send_data("stpt\n")
             pass
         case "start_trad":
             start_deploy = False
             start_trad = True
             # need to pass some message to the vehicle to make it stop
             if connected:
-                send_data("stpt\n")
+                # send_data("stpt\n")
+                send_data("strt\n")
+                send_data("trad\n")
             print("starting contour method")
             pass
         case _:

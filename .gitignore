@@ -10,6 +10,7 @@ data/
 *.pth
 *_models
 path_tracking/mobilenetv3
+*.MOV
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

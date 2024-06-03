@@ -81,6 +81,8 @@ WiFiClient client;
 
 //function prototypes
 
+bool trad = false;
+
 void stop();
 void calibrateLineSensor();
 void setMotor(int dir, int pwmVal, int enable, int in1, int in2);
@@ -92,7 +94,7 @@ void setup() {
   delay(10);
 
   // Initialize line sensor array
-  calibrateLineSensor();
+  // calibrateLineSensor();
 
   pinMode(buttonPin, INPUT);
 
@@ -166,17 +168,17 @@ void loop() {
 
   currTime = micros();
 
-  if ((currTime - prevTime)/1e6 >= INTERVAL && followLine){
-    client.print("_");
-    client.print(v1Filt[RIGHT]);
-    client.print(",");
-    client.print((v1Filt[LEFT])*-1);
-    client.print("\n");
+  // if ((currTime - prevTime)/1e6 >= INTERVAL && followLine){
+  //   client.print("_");
+  //   client.print(v1Filt[RIGHT]);
+  //   client.print(",");
+  //   client.print((v1Filt[LEFT])*-1);
+  //   client.print("\n");
 
-    Serial.println("sent");
-    prevTime = currTime;
+  //   Serial.println("sent");
+  //   prevTime = currTime;
 
-  }
+  // }
 
   if (client.available() > 0) {
     //read back one line from the server
@@ -184,11 +186,12 @@ void loop() {
     byte size = client.readBytesUntil('\n', line, maxBufferSize);
 
     line[size] = '\0';  //Null-terminator for the byte array
-    // Serial.println(line);
   }
+  // Serial.println(line);
+
     //check for starting training
   if (strcmp(line, "strt") == 0){
-    Serial1.println("start");
+    // Serial1.println("start");
     Serial.println("start");
     followLine = true;
   }
@@ -196,20 +199,44 @@ void loop() {
   //check for stopping training
   if (strcmp(line, "stpt") == 0){
     followLine = false;
+    trad = false;
     stop();
     Serial.println("stopping sending data");
   }
 
-  if (followLine && (strcmp(line, "mdl_deploy") == 0)){
-    char temp_line = [maxBufferSize];
-    temp_line[maxBufferSize] = '\0';
-    unsigned int temp_size = client.readBytesUntil('\n', temp_line, maxBufferSize)
-    
-    sscanf(line.c_str(), "%f,%f", &leftMotorSpeed, &rightMotorSpeed);
-    setMotors(leftMotorSpeed, rightMotorSpeed);
-    // l_speed,r_speed/n
+  if (strcmp(line, "trad") == 0){
+    trad = true;
+    Serial.println("Starting traditional method");
   }
 
+  if (trad){
+    float leftMotorSpeed = 0.0, rightMotorSpeed = 0.0;
+
+    char* token = strtok(line, ",");
+    if (token != NULL) {
+        leftMotorSpeed = atof(token);
+        token = strtok(NULL, ",");
+        if (token != NULL) {
+            rightMotorSpeed = atof(token);
+            Serial.print("Left Motor Speed: ");
+            Serial.println(leftMotorSpeed);
+            Serial.print("Right Motor Speed: ");
+            Serial.println(rightMotorSpeed);
+
+            setMotors((int)leftMotorSpeed, (int)rightMotorSpeed);
+        // } else {
+        //     // Serial.println("Failed to parse right motor speed");
+        // }
+            } 
+    // else {
+    //     // Serial.println("Failed to parse left motor speed");
+    // }
+
+    // Print the buffer to verify content
+    // Serial.print("Received line: ");
+    // Serial.println(line);
+    }
+  }
   // if (followLine){
   //   // Get line position
   //   unsigned int position = qtra.readLine(sensorValues, QTR_EMITTERS_ON, 1);
@@ -312,6 +339,7 @@ void setMotor(int pwmVal, int enable, int in1, int in2, int dir = 1) {
 }
 
 void setMotors(int pwmVal_Left, int pwmVal_Right) {
+  Serial.println(pwmVal_Right);
   digitalWrite(motorRight_InputOne, HIGH);
   digitalWrite(motorRight_InputTwo, LOW);
   analogWrite(motorRight_Enable, pwmVal_Right);

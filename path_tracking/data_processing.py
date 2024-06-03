@@ -122,4 +122,4 @@ def combine_and_normalize_velocity_files(folder_path, normalize = True, log_tran
 if __name__ == "__main__":
     path = 'data'
     n, v, m = combine_and_normalize_velocity_files(path, log_transform=True)
-    # print(np.info(n))
+    # print(np.info(n)) 
