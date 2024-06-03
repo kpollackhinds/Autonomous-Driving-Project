@@ -2,6 +2,11 @@
 
 Object detection and path following using ESP32 CAM and Wifi Video Streaming
 
+Full documentation available here:
+- [Spring 2024 Report (Most recent)](https://www.overleaf.com/read/cvtkfzjbzdcq#cf5f8e)
+- [Fall 2023 Report (More detailed mechanical and electrical information)](https://www.overleaf.com/read/jpbfzhhsykrk#73abcc)
+
+
 ## Objective
 
 The goal of this project is to develop an autonomous vehicle that leverages remote computation resources in order to make decisions based on perception. Features will include object detection, path following, and obstacle avoidance.
@@ -32,15 +37,16 @@ const char* password = "123w4"; // Replace "123w4" with your actual password
 const char* ip_address = "***.***.*.***";
 ```
 
-into the [Arduino Sketch](https://github.com/kpollackhinds/Autonomous-Driving-Project/blob/main/Arduino_wifi/arduino_esp32/main/main.ino).
+into the any of the [Arduino Sketches](https://github.com/kpollackhinds/Autonomous-Driving-Project/tree/main/Arduino_wifi/arduino_uno_r4_wifi).
 
 Ensure the source of your video stream is correct in the index.html file in order to see the camera feed.
 
-If all these steps are done, the ESP32 Wrover is powered and **everything is on the same network**, you can run the app.py file and you should see the following output:
+If all these steps are done, the ESP32 Wrover is powered and **everything is on the same network**, you can run the app.py file using _python web_server app.py --cam 1_ to run with the camera or specifying the arg --cam 0 to run if the camera is not connected. You should see the following output:
+![image](https://github.com/kpollackhinds/Autonomous-Driving-Project/assets/84944416/530f669b-8f07-4c15-b97f-f0fce1de9e56)
 
-![image](https://github.com/kpollackhinds/Autonomous-Driving-Project/assets/84944416/54fe55ed-eae1-4c08-ae96-d354a7def9e0)
+Clicking the "Connect to Device" Button will intiate the socket connection to the MCU. The color of the button will change to green once conneted.
 
-Clicking the start button will initialize the connection the MCU board. (Check terminal for confirmation output).
+There are two different Arduino Sketches used in the [Arduino R4 Wifi Folder](https://github.com/kpollackhinds/Autonomous-Driving-Project/tree/main/Arduino_wifi/arduino_uno_r4_wifi) for training and path tracking method deployment. Either one automatically handles the connection. The model deployment file as of right now only handle the [traditional line contour based line following method](https://www.overleaf.com/project/660e2ea59c73f2049fa892e0#subsubsection.3.3.1:~:text=3.3.1-,Method%20Development,-The%20traditional%20method).
 
 ## Parts Used
 
