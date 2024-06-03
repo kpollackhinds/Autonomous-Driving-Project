@@ -12,6 +12,7 @@ data/
 path_tracking/mobilenetv3
 *.MOV
 Arduino_wifi/arduino_esp32
+path_tracking/mobileNetV3_training.ipynb
 
 Pico/
 # Byte-compiled / optimized / DLL files
